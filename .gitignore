@@ -1,0 +1,37 @@
+# Directories
+.vs/
+.idea/
+/bin/
+/obj/
+/cmake-build-debug/
+/cmake-build-release/
+build
+cmake
+
+# Files
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.bat
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.mtl
+*.blend
+*.obj
+*.ttf
+*.otf
+*.ini
+*.lock
+*.json
+*.bsh
+*.col
+*.cod
+*.bak
+*.BSH
+*.COL
+*.txt
+
+!/config.ini
