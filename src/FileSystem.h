@@ -24,4 +24,6 @@
 namespace ic::fs
 {
     std::set<std::filesystem::path> read_from(const std::filesystem::path& t_path);
+
+    bool IsRoot(const std::filesystem::path& t_path);
 }

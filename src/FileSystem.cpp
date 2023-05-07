@@ -28,3 +28,15 @@ std::set<std::filesystem::path> ic::fs::read_from(const std::filesystem::path& t
 
     return results;
 }
+
+bool ic::fs::IsRoot(const std::filesystem::path& t_path)
+{
+    return t_path != std::filesystem::path(std::filesystem::current_path().root_path());
+/*
+#if defined(_WIN64) && defined(_MSC_VER)
+    return t_path != std::filesystem::path(std::filesystem::current_path().root_path());
+#else
+    return t_path != std::filesystem::path("/");
+#endif
+*/
+}

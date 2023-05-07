@@ -30,6 +30,6 @@ namespace ic::renderer
         int* t_selected,
         const std::filesystem::path& t_clickedFile
     );
-
+    std::string to_zero_lead(const std::string& t_time);
     std::string last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime);
 }

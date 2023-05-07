@@ -17,6 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
+#include <algorithm>
+#include "FileSystem.h"
 #include "Renderer.h"
 #include "Log.h"
 
@@ -36,7 +38,7 @@ void ic::renderer::render_table(
         ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        if (t_from != std::filesystem::path("/"))
+        if (fs::IsRoot(t_from))
         {
             ImGui::TableNextRow();
             for (int column = 0; column < 3; column++)
@@ -72,14 +74,14 @@ void ic::renderer::render_table(
                     {
                         size += std::filesystem::file_size(entry);
 
-                        if (ImGui::Selectable(entry.filename().c_str(), *t_selected == i))
+                        if (ImGui::Selectable(entry.filename().string().c_str(), *t_selected == i))
                         {
                             *t_selected = i;
                         }
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
-                        if (std::string sl{ "/" }; ImGui::Selectable(sl.append(entry.filename()).c_str(), *t_selected == i))
+                        if (std::string sl{ "/" }; ImGui::Selectable(sl.append(entry.filename().string()).c_str(), *t_selected == i))
                         {
                             *t_selected = i;
                         }
@@ -142,11 +144,32 @@ void ic::renderer::render_table(
     }
 }
 
+std::string ic::renderer::to_zero_lead(const std::string& t_time)
+{
+    return std::string(2 - std::min(2, static_cast<int>(t_time.length())), '0') + t_time;
+}
+
 std::string ic::renderer::last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime)
 {
-    const std::time_t cftime{ std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(t_fileTime)) };
-    const auto tminfo{ localtime(&cftime) };
+    std::chrono::time_point<std::chrono::system_clock> ftsys;
 
-    return std::to_string(tminfo->tm_mday).append(".").append(std::to_string(tminfo->tm_mon)).append(".").append(std::to_string(tminfo->tm_year + 1900)).
-        append(" ").append(std::to_string(tminfo->tm_hour)).append(":").append(std::to_string(tminfo->tm_min));
+#if defined(_WIN64) && defined(_MSC_VER)
+    ftsys = std::chrono::utc_clock::to_sys(std::chrono::file_clock::to_utc(t_fileTime));
+#else
+    ftsys = std::chrono::file_clock::to_sys(t_fileTime);
+    //const std::time_t cftime{ std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(t_fileTime)) };
+#endif
+    time_t ftt{ std::chrono::system_clock::to_time_t(ftsys) };
+    const auto tminfo{ localtime(&ftt) };
+
+    return
+        to_zero_lead(std::to_string(tminfo->tm_mday)).
+        append(".").
+        append(to_zero_lead(std::to_string(tminfo->tm_mon))).
+        append(".").
+        append(std::to_string(tminfo->tm_year + 1900)).
+        append(" ").
+        append(to_zero_lead(std::to_string(tminfo->tm_hour))).
+        append(":").
+        append(to_zero_lead(std::to_string(tminfo->tm_min)));
 }
