@@ -23,7 +23,9 @@
 
 namespace ic::fs
 {
-    std::set<std::filesystem::path> read_from(const std::filesystem::path& t_path);
+    bool path_comparator(const std::filesystem::path& t_p1, const std::filesystem::path& t_p2);
 
-    bool IsRoot(const std::filesystem::path& t_path);
+    std::set<std::filesystem::path, decltype(fs::path_comparator)*> read_from(const std::filesystem::path& t_path);
+
+    bool is_root(const std::filesystem::path& t_path);
 }

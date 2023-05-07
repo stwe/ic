@@ -18,13 +18,15 @@
 
 #include <imgui.h>
 #include <algorithm>
+#include <unistd.h> // todo if linux
 #include "FileSystem.h"
 #include "Renderer.h"
 #include "Log.h"
+#include "Window.h"
 
 void ic::renderer::render_table(
     const std::filesystem::path& t_from,
-    const std::set<std::filesystem::path>& t_entries,
+    const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
     int* t_selected,
     const std::filesystem::path& t_clickedFile
 )
@@ -38,7 +40,7 @@ void ic::renderer::render_table(
         ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        if (fs::IsRoot(t_from))
+        if (fs::is_root(t_from))
         {
             ImGui::TableNextRow();
             for (int column = 0; column < 3; column++)
@@ -74,16 +76,35 @@ void ic::renderer::render_table(
                     {
                         size += std::filesystem::file_size(entry);
 
-                        if (ImGui::Selectable(entry.filename().string().c_str(), *t_selected == i))
+                        if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            *t_selected = i;
+                            if (ImGui::Selectable(entry.filename().string().c_str(), *t_selected == i))
+                            {
+                                *t_selected = i;
+                            }
+                        }
+                        else
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
+                            ImGui::TextUnformatted(entry.filename().string().c_str());
+                            ImGui::PopStyleColor(1);
                         }
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
-                        if (std::string sl{ "/" }; ImGui::Selectable(sl.append(entry.filename().string()).c_str(), *t_selected == i))
+                        if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            *t_selected = i;
+                            if (std::string sl{ "/" }; ImGui::Selectable(sl.append(entry.filename().string()).c_str(), *t_selected == i))
+                            {
+                                *t_selected = i;
+                            }
+                        }
+                        else
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
+                            std::string sl{ "/" };
+                            ImGui::TextUnformatted(sl.append(entry.filename().string()).c_str());
+                            ImGui::PopStyleColor(1);
                         }
                     }
                 }
@@ -157,8 +178,8 @@ std::string ic::renderer::last_write_time_to_str(const std::filesystem::file_tim
     ftsys = std::chrono::utc_clock::to_sys(std::chrono::file_clock::to_utc(t_fileTime));
 #else
     ftsys = std::chrono::file_clock::to_sys(t_fileTime);
-    //const std::time_t cftime{ std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(t_fileTime)) };
 #endif
+
     time_t ftt{ std::chrono::system_clock::to_time_t(ftsys) };
     const auto tminfo{ localtime(&ftt) };
 

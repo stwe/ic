@@ -62,7 +62,7 @@ namespace ic
         //-------------------------------------------------
 
         std::unique_ptr<Window> m_window;
-        std::filesystem::path m_currentPathLeft{ std::filesystem::current_path() };
+        std::filesystem::path m_currentPathLeft{ std::filesystem::path("/") };
         std::filesystem::path m_currentPathRight{ std::filesystem::current_path() };
         std::filesystem::path m_lastClickedFileLeft;
         std::filesystem::path m_lastClickedFileRight;
