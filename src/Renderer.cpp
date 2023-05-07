@@ -116,7 +116,7 @@ void ic::renderer::render_table(
                 {
                     if (is_regular_file(entry))
                     {
-                        ImGui::Text("%ju", std::filesystem::file_size(entry));
+                        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(entry)).c_str());
                     }
                     else
                     {
@@ -151,11 +151,11 @@ void ic::renderer::render_table(
                 ImGui::Separator();
                 if (!t_clickedFile.empty())
                 {
-                    ImGui::Text("%ju kb", std::filesystem::file_size(t_clickedFile) / 1024);
+                    ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_clickedFile)).c_str());
                 }
                 else
                 {
-                    ImGui::Text("%lu mb", size / 1024 / 1024);
+                    ImGui::Text("%s", get_human_readable_size(size).c_str());
                 }
             }
             if (column == 2)
@@ -197,4 +197,26 @@ std::string ic::renderer::last_write_time_to_str(const std::filesystem::file_tim
         append(to_zero_lead(std::to_string(tminfo->tm_hour))).
         append(":").
         append(to_zero_lead(std::to_string(tminfo->tm_min)));
+}
+
+std::string ic::renderer::get_human_readable_size(unsigned long t_bytes)
+{
+    static constexpr float gb{ 1024.0f * 1024.0f * 1024.0f };
+    static constexpr float mb{ 1024.0f * 1024.0f };
+    static constexpr float kb{ 1024.0f };
+
+    if(auto bytes{ static_cast<float>(t_bytes) }; bytes > gb)
+    {
+        return std::to_string(bytes / gb).append(" Gb ");
+    }
+    else if(bytes > mb)
+    {
+        return std::to_string(bytes / mb).append(" Mb ");
+    }
+    else if(bytes > kb)
+    {
+        return std::to_string(bytes / kb).append(" Kb ");
+    }
+
+    return std::to_string(t_bytes).append(" B ");
 }
