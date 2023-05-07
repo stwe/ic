@@ -92,9 +92,14 @@ void ic::renderer::render_table(
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
+                        std::string pre = "/";
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            if (std::string sl{ "/" }; ImGui::Selectable(sl.append(entry.filename().string()).c_str(), *t_selected == i))
+                            if (std::filesystem::is_symlink(entry))
+                            {
+                                pre = "~";
+                            }
+                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), *t_selected == i))
                             {
                                 *t_selected = i;
                             }
@@ -102,8 +107,7 @@ void ic::renderer::render_table(
                         else
                         {
                             ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
-                            std::string sl{ "/" };
-                            ImGui::TextUnformatted(sl.append(entry.filename().string()).c_str());
+                            ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
                     }
