@@ -27,15 +27,12 @@
 void ic::renderer::render_table(
     const std::filesystem::path& t_from,
     const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
-    int* t_selected,
-    const std::filesystem::path& t_clickedFile
+    int* t_selected
 )
 {
-    unsigned long size{ 0 };
-
-    if (ImGui::BeginTable("##table", 3, ImGuiTableFlags_BordersV))
+    if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
         ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
@@ -74,8 +71,6 @@ void ic::renderer::render_table(
                 {
                     if (is_regular_file(entry))
                     {
-                        size += std::filesystem::file_size(entry);
-
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
                             if (ImGui::Selectable(entry.filename().string().c_str(), *t_selected == i))
@@ -133,39 +128,28 @@ void ic::renderer::render_table(
             ImGui::PopID();
             ++i;
         }
-
-        ImGui::TableNextRow();
-        for (int column = 0; column < 3; column++)
-        {
-            ImGui::TableSetColumnIndex(column);
-            if (column == 0)
-            {
-                ImGui::Separator();
-                if (!t_clickedFile.empty())
-                {
-                    ImGui::Text("%s", t_clickedFile.filename().string().c_str());
-                }
-            }
-            if (column == 1)
-            {
-                ImGui::Separator();
-                if (!t_clickedFile.empty())
-                {
-                    ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_clickedFile)).c_str());
-                }
-                else
-                {
-                    ImGui::Text("%s", get_human_readable_size(size).c_str());
-                }
-            }
-            if (column == 2)
-            {
-                ImGui::Separator();
-                ImGui::Text("");
-            }
-        }
-
         ImGui::EndTable();
+    }
+}
+
+void ic::renderer::render_clicked_path_info(const std::filesystem::path& t_clickedPath)
+{
+    if (!t_clickedPath.empty() && std::filesystem::is_regular_file(t_clickedPath))
+    {
+        ImGui::Text("%s", t_clickedPath.filename().string().c_str());
+        ImGui::SameLine();
+        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_clickedPath)).c_str());
+    }
+    else if (!t_clickedPath.empty() && std::filesystem::is_directory(t_clickedPath))
+    {
+        if (std::filesystem::is_symlink(t_clickedPath))
+        {
+            ImGui::Text("%s", std::string("~").append(t_clickedPath.filename().string()).c_str());
+        }
+        else
+        {
+            ImGui::Text("%s", std::string("/").append(t_clickedPath.filename().string()).c_str());
+        }
     }
 }
 

@@ -27,9 +27,10 @@ namespace ic::renderer
     void render_table(
         const std::filesystem::path& t_from,
         const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
-        int* t_selected,
-        const std::filesystem::path& t_clickedFile
+        int* t_selected
     );
+
+    void render_clicked_path_info(const std::filesystem::path& t_clickedPath);
 
     std::string to_zero_lead(const std::string& t_time);
     std::string last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime);

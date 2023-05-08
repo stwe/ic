@@ -80,6 +80,8 @@ void ic::App::Render()
     RenderMainMenu();
     RenderLeft();
     RenderRight();
+    RenderLeftInfo();
+    RenderRightInfo();
     RenderMainMenuButtons();
 
     //ImGui::ShowDemoWindow();
@@ -153,7 +155,7 @@ void ic::App::RenderMainMenu()
 void ic::App::RenderLeft()
 {
     ImGui::SetNextWindowPos({ 0.0f, ImGui::GetFrameHeight() });
-    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 3.0f) });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
     ImGui::Begin(
         "##left",
@@ -169,15 +171,14 @@ void ic::App::RenderLeft()
     renderer::render_table(
         m_currentPathLeft,
         fs::read_from(m_currentPathLeft),
-        &selectedIndex,
-        m_lastClickedFileLeft
+        &selectedIndex
     );
 
     // click on UP-DIR
     if (selectedIndex == 0)
     {
         m_currentPathLeft = m_currentPathLeft.parent_path();
-        m_lastClickedFileLeft = std::filesystem::path();
+        m_lastClickedLeft = std::filesystem::path();
         selectedIndex = -1;
     }
 
@@ -188,13 +189,9 @@ void ic::App::RenderLeft()
         if (std::filesystem::is_directory(res))
         {
             m_currentPathLeft = res;
-            m_lastClickedFileLeft = std::filesystem::path();
-        }
-        if (std::filesystem::is_regular_file(res))
-        {
-            m_lastClickedFileLeft = res;
         }
 
+        m_lastClickedLeft = res;
         selectedIndex = -1;
     }
 
@@ -206,7 +203,7 @@ void ic::App::RenderLeft()
 void ic::App::RenderRight()
 {
     ImGui::SetNextWindowPos({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() });
-    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 3.0f) });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
     ImGui::Begin(
         "##right",
@@ -222,15 +219,14 @@ void ic::App::RenderRight()
     renderer::render_table(
         m_currentPathRight,
         fs::read_from(m_currentPathRight),
-        &selectedIndex,
-        m_lastClickedFileRight
+        &selectedIndex
     );
 
     // click on UP-DIR
     if (selectedIndex == 0)
     {
         m_currentPathRight = m_currentPathRight.parent_path();
-        m_lastClickedFileRight = std::filesystem::path();
+        m_lastClickedRight = std::filesystem::path();
         selectedIndex = -1;
     }
 
@@ -241,16 +237,51 @@ void ic::App::RenderRight()
         if (std::filesystem::is_directory(res))
         {
             m_currentPathRight = res;
-            m_lastClickedFileRight = std::filesystem::path();
         }
-        if (std::filesystem::is_regular_file(res))
-        {
-            m_lastClickedFileRight = res;
-        }
+
+        m_lastClickedRight = res;
         selectedIndex = -1;
     }
 
     ImGui::Separator();
+
+    ImGui::End();
+}
+
+void ic::App::RenderLeftInfo()
+{
+    ImGui::SetNextWindowPos({ 0.0f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f) });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 4.0f });
+
+    ImGui::Begin(
+        "##infoLeft",
+        nullptr,
+        ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoSavedSettings
+    );
+
+    renderer::render_clicked_path_info(m_lastClickedLeft);
+
+    ImGui::End();
+}
+
+void ic::App::RenderRightInfo()
+{
+    ImGui::SetNextWindowPos({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f) });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 4.0f });
+
+    ImGui::Begin(
+        "##infoRight",
+        nullptr,
+        ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoSavedSettings
+    );
+
+    renderer::render_clicked_path_info(m_lastClickedRight);
 
     ImGui::End();
 }
