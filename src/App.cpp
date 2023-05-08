@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui_internal.h>
 #include "App.h"
 #include "Log.h"
 #include "Window.h"
@@ -101,6 +102,8 @@ void ic::App::RenderMainMenu()
 
     if (ImGui::BeginMainMenuBar())
     {
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
         if (ImGui::BeginMenu("Left"))
         {
             if (ImGui::MenuItem("File listing", "CTRL+G"))
@@ -114,6 +117,8 @@ void ic::App::RenderMainMenu()
             if (ImGui::MenuItem("Rescan", "CTRL+R")) {}
             ImGui::EndMenu();
         }
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
 
         if (ImGui::BeginMenu("File"))
         {
@@ -126,6 +131,8 @@ void ic::App::RenderMainMenu()
             ImGui::EndMenu();
         }
 
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
         if (ImGui::BeginMenu("Command"))
         {
             ImGui::EndMenu();
@@ -149,6 +156,8 @@ void ic::App::RenderMainMenu()
             if (ImGui::MenuItem("Rescan", "CTRL+R")) {}
             ImGui::EndMenu();
         }
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
 
         ImGui::EndMainMenuBar();
     }
@@ -292,7 +301,23 @@ void ic::App::RenderMainMenuButtons()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    if (ImGui::Button("Help")) {}
+    if (ImGui::Button("Help"))
+    {
+        ImGui::OpenPopup("##HelpScreen");
+    }
+    if (ImGui::BeginPopupModal("##HelpScreen", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("This is the main help screen for ic.");
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SetItemDefaultFocus();
+        ImGui::EndPopup();
+    }
+
+    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     ImGui::SameLine();
     if (ImGui::Button("Menu")) {}
     ImGui::SameLine();
@@ -310,6 +335,9 @@ void ic::App::RenderMainMenuButtons()
     ImGui::SameLine();
     if (ImGui::Button("PullDn")) {}
     ImGui::SameLine();
+    ImGui::PopItemFlag();
+    ImGui::PopStyleVar();
+
     if (ImGui::Button("Quit"))
     {
         SDL_Event event;
