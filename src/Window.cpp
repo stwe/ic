@@ -17,13 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Window.h"
+#include "App.h"
 #include "Log.h"
 #include "IcException.h"
 #include "vendor/imgui/imgui_impl_opengl3.h"
 #include "vendor/imgui/imgui_impl_opengl3_loader.h"
 #include "vendor/imgui/imgui_impl_sdl2.h"
 
-ic::Window::Window(std::string t_title, int t_width, int t_height)
+ic::Window::Window(std::string t_title, const int t_width, const int t_height)
     : width{ t_width }
     , height{ t_height }
     , m_title{ std::move(t_title) }
@@ -31,6 +32,7 @@ ic::Window::Window(std::string t_title, int t_width, int t_height)
     IC_LOG_DEBUG("[Window::Window()] Create Window.");
 
     InitSdl();
+    ConfigTheme();
     InitImGui();
 }
 
@@ -63,8 +65,6 @@ void ic::Window::EndFrame() const
 
 void ic::Window::ChangeSize(const int t_width, const int t_height)
 {
-    IC_LOG_DEBUG("[Window::ChangeSize()] Change window size to {}x{}.", width, height);
-
     width = t_width;
     height = t_height;
     glViewport(0, 0, width, height);
@@ -112,6 +112,41 @@ void ic::Window::InitSdl()
     SDL_GL_SetSwapInterval(1);
 }
 
+void ic::Window::ConfigTheme()
+{
+    IC_LOG_DEBUG("[Window::ConfigTheme()] Read color values from the config.ini file.");
+
+    auto windowBg{ App::INI.GetVector<float>("theme", "window_bg_color") };
+    auto text{ App::INI.GetVector<float>("theme", "text_color") };
+    auto titleBg{ App::INI.GetVector<float>("theme", "title_bg_color") };
+    auto titleBgActive{ App::INI.GetVector<float>("theme", "title_bg_active_color") };
+    auto border{ App::INI.GetVector<float>("theme", "border_color") };
+    auto headerHovered{ App::INI.GetVector<float>("theme", "header_hovered_color") };
+    auto menuBarBg{ App::INI.GetVector<float>("theme", "menu_bar_bg_color") };
+    auto warn{ App::INI.GetVector<float>("theme", "warn_color") };
+
+    std::vector<std::vector<float>> colors{
+        windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn
+    };
+
+    for (const auto& col : colors)
+    {
+        if (col.size() != 3)
+        {
+            throw IC_EXCEPTION("[Window::ConfigTheme()] Invalid color config.");
+        }
+    }
+
+    window_bg_color = ImVec4(windowBg.at(0), windowBg.at(1), windowBg.at(2), 1.0f);
+    text_color = ImVec4(text.at(0), text.at(1), text.at(2), 1.0f);
+    title_bg_color = ImVec4(titleBg.at(0), titleBg.at(1), titleBg.at(2), 1.0f);
+    title_bg_active_color = ImVec4(titleBgActive.at(0), titleBgActive.at(1), titleBgActive.at(2), 1.0f);
+    border_color = ImVec4(border.at(0), border.at(1), border.at(2), 1.0f);
+    header_hovered_color = ImVec4(headerHovered.at(0), headerHovered.at(1), headerHovered.at(2), 1.0f);
+    menu_bar_bg_color = ImVec4(menuBarBg.at(0), menuBarBg.at(1), menuBarBg.at(2), 1.0f);
+    warn_color = ImVec4(warn.at(0), warn.at(1), warn.at(2), 1.0f);
+}
+
 void ic::Window::InitImGui()
 {
     IC_LOG_DEBUG("[Window::InitImGui()] Initializing ImGui.");
@@ -123,15 +158,15 @@ void ic::Window::InitImGui()
     }
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_Text] = TEXT_COLOR;
-    style.Colors[ImGuiCol_WindowBg] = WINDOW_BG_COLOR;
-    style.Colors[ImGuiCol_TitleBg] = TITLE_BG_COLOR;
-    style.Colors[ImGuiCol_TitleBgActive] = COLOR_TITLE_BG_ACTIVE;
-    style.Colors[ImGuiCol_Border] = BORDER_COLOR;
-    style.Colors[ImGuiCol_HeaderHovered] = HEADER_HOVERED_COLOR;
-    style.Colors[ImGuiCol_MenuBarBg] = MENU_BAR_BG_COLOR;
-    style.Colors[ImGuiCol_Button] = TITLE_BG_COLOR;
-    style.Colors[ImGuiCol_ButtonHovered] = HEADER_HOVERED_COLOR;
+    style.Colors[ImGuiCol_Text] = text_color;
+    style.Colors[ImGuiCol_WindowBg] = window_bg_color;
+    style.Colors[ImGuiCol_TitleBg] = title_bg_color;
+    style.Colors[ImGuiCol_TitleBgActive] = title_bg_active_color;
+    style.Colors[ImGuiCol_Border] = border_color;
+    style.Colors[ImGuiCol_HeaderHovered] = header_hovered_color;
+    style.Colors[ImGuiCol_MenuBarBg] = menu_bar_bg_color;
+    style.Colors[ImGuiCol_Button] = title_bg_color;
+    style.Colors[ImGuiCol_ButtonHovered] = header_hovered_color;
 
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, m_sdlGlContext);
 

@@ -89,7 +89,7 @@ void ic::renderer::render_table(
                         }
                         else
                         {
-                            ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
+                            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
@@ -112,7 +112,7 @@ void ic::renderer::render_table(
                         }
                         else
                         {
-                            ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
+                            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }

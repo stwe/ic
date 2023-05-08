@@ -57,7 +57,11 @@ void ic::App::Init()
 {
     IC_LOG_DEBUG("[App::Init()] Initializing app...");
 
-    m_window = std::make_unique<Window>("ic", 1024, 768);
+    m_window = std::make_unique<Window>(
+        "ic",
+        INI.Get<int>("window", "width"),
+        INI.Get<int>("window", "height")
+    );
 
     IC_LOG_DEBUG("[App::Init()] The app was successfully initialized.");
 }
@@ -91,9 +95,9 @@ void ic::App::Render()
 
 void ic::App::RenderMainMenu()
 {
-    ImGui::PushStyleColor(ImGuiCol_Border, Window::TITLE_BG_COLOR);
-    ImGui::PushStyleColor(ImGuiCol_PopupBg, Window::TITLE_BG_COLOR);
-    ImGui::PushStyleColor(ImGuiCol_TextDisabled, Window::TEXT_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Border, Window::title_bg_color);
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, Window::title_bg_color);
+    ImGui::PushStyleColor(ImGuiCol_TextDisabled, Window::text_color);
 
     if (ImGui::BeginMainMenuBar())
     {

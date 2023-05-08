@@ -28,26 +28,21 @@ namespace ic
     {
     public:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        static constexpr auto WINDOW_BG_COLOR{ ImVec4(0.0f, 0.0f, 0.66f, 1.00f) };
-        static constexpr auto TEXT_COLOR{ ImVec4(1.0f, 1.0f, 1.0f, 1.00f) };
-        static constexpr auto TITLE_BG_COLOR{ ImVec4(0.0f, 0.66f, 0.66f, 1.00f) };
-        static constexpr auto COLOR_TITLE_BG_ACTIVE{ ImVec4(0.66f, 0.66f, 0.66f, 1.00f) };
-        static constexpr auto BORDER_COLOR{ ImVec4(0.3f, 0.3f, 0.3f, 1.00f) };
-        static constexpr auto HEADER_HOVERED_COLOR{ ImVec4(0.3f, 0.3f, 0.3f, 1.0f) };
-        static constexpr auto MENU_BAR_BG_COLOR{ ImVec4(0.0f, 0.66f, 0.66f, 1.0f) };
-
-        static constexpr auto WARN_COLOR{ ImVec4(0.7f, 0.1f, 0.1f, 1.0f) };
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         SDL_Window* sdlWindow{ nullptr };
         int width;
         int height;
+
+        inline static ImVec4 window_bg_color{ ImVec4(0.0f, 0.0f, 0.66f, 1.00f) };
+        inline static ImVec4 text_color{ ImVec4(1.0f, 1.0f, 1.0f, 1.00f) };
+        inline static ImVec4 title_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.00f) };
+        inline static ImVec4 title_bg_active_color{ ImVec4(0.66f, 0.66f, 0.66f, 1.00f) };
+        inline static ImVec4 border_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.00f) };
+        inline static ImVec4 header_hovered_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.0f) };
+        inline static ImVec4 menu_bar_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.0f) };
+        inline static ImVec4 warn_color{ ImVec4(0.7f, 0.1f, 0.1f, 1.0f) };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -92,6 +87,7 @@ namespace ic
         //-------------------------------------------------
 
         void InitSdl();
+        void ConfigTheme();
         void InitImGui();
 
         //-------------------------------------------------
