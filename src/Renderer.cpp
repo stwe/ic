@@ -18,7 +18,11 @@
 
 #include <imgui.h>
 #include <algorithm>
-#include <unistd.h> // todo if linux
+#if defined(_WIN64) && defined(_MSC_VER)
+    #include <io.h>
+#else
+    #include <unistd.h>
+#endif
 #include "FileSystem.h"
 #include "Renderer.h"
 #include "App.h"
@@ -73,6 +77,14 @@ void ic::renderer::render_table(
                 {
                     if (is_regular_file(entry))
                     {
+#if defined(_WIN64) && defined(_MSC_VER)
+                        if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+                        {
+                            t_pathClick.id = i;
+                            t_pathClick.path = entry;
+                            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+                        }
+#else
                         std::string pre;
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
@@ -93,10 +105,40 @@ void ic::renderer::render_table(
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
+#endif
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
                         std::string pre = "/";
+#if defined(_WIN64) && defined(_MSC_VER)
+                        if (_access(entry.string().c_str(), 4) == 0)
+                        {
+                            auto test{ false };
+
+                            try
+                            {
+                                if (std::filesystem::is_symlink(entry))
+                                {}
+                            }
+                            catch (std::filesystem::filesystem_error& e)
+                            {
+                                ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
+                                ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
+                                ImGui::PopStyleColor(1);
+                                test = true;
+                            }
+
+                            if (!test)
+                            {
+                                if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+                                {
+                                    t_pathClick.id = i;
+                                    t_pathClick.path = entry;
+                                    t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+                                }
+                            }
+                        }
+#else
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
                             if (std::filesystem::is_symlink(entry))
@@ -116,6 +158,7 @@ void ic::renderer::render_table(
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
+#endif
                     }
                 }
                 if (column == 1)
