@@ -21,13 +21,13 @@
 #include <unistd.h> // todo if linux
 #include "FileSystem.h"
 #include "Renderer.h"
-#include "Log.h"
+#include "App.h"
 #include "Window.h"
 
 void ic::renderer::render_table(
     const std::filesystem::path& t_from,
     const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
-    int* t_selected
+    PathClick& t_pathClick
 )
 {
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
@@ -45,9 +45,11 @@ void ic::renderer::render_table(
                 ImGui::TableSetColumnIndex(column);
                 if (column == 0)
                 {
-                    if (ImGui::Selectable("/..", *t_selected == 0))
+                    if (ImGui::Selectable("/..", t_pathClick.id == 0))
                     {
-                        *t_selected = 0;
+                        t_pathClick.id = 0;
+                        t_pathClick.path = std::filesystem::path();
+                        t_pathClick.doubleClick = false;
                     }
                 }
                 if (column == 1)
@@ -73,9 +75,11 @@ void ic::renderer::render_table(
                     {
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            if (ImGui::Selectable(entry.filename().string().c_str(), *t_selected == i))
+                            if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i))
                             {
-                                *t_selected = i;
+                                t_pathClick.id = i;
+                                t_pathClick.path = entry;
+                                t_pathClick.doubleClick = false;
                             }
                         }
                         else
@@ -94,9 +98,11 @@ void ic::renderer::render_table(
                             {
                                 pre = "~";
                             }
-                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), *t_selected == i))
+                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i))
                             {
-                                *t_selected = i;
+                                t_pathClick.id  = i;
+                                t_pathClick.path = entry;
+                                t_pathClick.doubleClick = false;
                             }
                         }
                         else
@@ -132,23 +138,23 @@ void ic::renderer::render_table(
     }
 }
 
-void ic::renderer::render_clicked_path_info(const std::filesystem::path& t_clickedPath)
+void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
 {
-    if (!t_clickedPath.empty() && std::filesystem::is_regular_file(t_clickedPath))
+    if (!t_pathClick.path.empty() && std::filesystem::is_regular_file(t_pathClick.path))
     {
-        ImGui::Text("%s", t_clickedPath.filename().string().c_str());
+        ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
         ImGui::SameLine();
-        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_clickedPath)).c_str());
+        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_pathClick.path)).c_str());
     }
-    else if (!t_clickedPath.empty() && std::filesystem::is_directory(t_clickedPath))
+    else if (!t_pathClick.path.empty() && std::filesystem::is_directory(t_pathClick.path))
     {
-        if (std::filesystem::is_symlink(t_clickedPath))
+        if (std::filesystem::is_symlink(t_pathClick.path))
         {
-            ImGui::Text("%s", std::string("~").append(t_clickedPath.filename().string()).c_str());
+            ImGui::Text("%s", std::string("~").append(t_pathClick.path.filename().string()).c_str());
         }
         else
         {
-            ImGui::Text("%s", std::string("/").append(t_clickedPath.filename().string()).c_str());
+            ImGui::Text("%s", std::string("/").append(t_pathClick.path.filename().string()).c_str());
         }
     }
 }

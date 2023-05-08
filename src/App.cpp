@@ -166,36 +166,28 @@ void ic::App::RenderLeft()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    // todo
-    static int selectedIndex = -1;
     renderer::render_table(
         m_currentPathLeft,
         fs::read_from(m_currentPathLeft),
-        &selectedIndex
+        m_lastClickedLeft
     );
 
     // click on UP-DIR
-    if (selectedIndex == 0)
+    if (m_lastClickedLeft.id == 0)
     {
+        // update current path
         m_currentPathLeft = m_currentPathLeft.parent_path();
-        m_lastClickedLeft = std::filesystem::path();
-        selectedIndex = -1;
+
+        // reset clicked
+        m_lastClickedLeft.path = std::filesystem::path();
+        m_lastClickedLeft.id = -1;
     }
 
     // click on other
-    if (selectedIndex > 0)
+    if (m_lastClickedLeft.id > 0 && std::filesystem::is_directory(m_lastClickedLeft.path))
     {
-        auto res = *std::next(fs::read_from(m_currentPathLeft).begin(), selectedIndex-1);
-        if (std::filesystem::is_directory(res))
-        {
-            m_currentPathLeft = res;
-        }
-
-        m_lastClickedLeft = res;
-        selectedIndex = -1;
+        m_currentPathLeft = m_lastClickedLeft.path;
     }
-
-    ImGui::Separator();
 
     ImGui::End();
 }
@@ -214,36 +206,28 @@ void ic::App::RenderRight()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    // todo
-    static int selectedIndex = -1;
     renderer::render_table(
         m_currentPathRight,
         fs::read_from(m_currentPathRight),
-        &selectedIndex
+        m_lastClickedRight
     );
 
     // click on UP-DIR
-    if (selectedIndex == 0)
+    if (m_lastClickedRight.id == 0)
     {
+        // update current path
         m_currentPathRight = m_currentPathRight.parent_path();
-        m_lastClickedRight = std::filesystem::path();
-        selectedIndex = -1;
+
+        // reset clicked
+        m_lastClickedRight.path = std::filesystem::path();
+        m_lastClickedRight.id = -1;
     }
 
     // click on other
-    if (selectedIndex > 0)
+    if (m_lastClickedRight.id > 0 && std::filesystem::is_directory(m_lastClickedRight.path))
     {
-        auto res = *std::next(fs::read_from(m_currentPathRight).begin(), selectedIndex-1);
-        if (std::filesystem::is_directory(res))
-        {
-            m_currentPathRight = res;
-        }
-
-        m_lastClickedRight = res;
-        selectedIndex = -1;
+        m_currentPathRight = m_lastClickedRight.path;
     }
-
-    ImGui::Separator();
 
     ImGui::End();
 }

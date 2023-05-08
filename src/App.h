@@ -26,6 +26,13 @@ namespace ic
 {
     class Window;
 
+    struct PathClick
+    {
+        int id{ -1 };
+        std::filesystem::path path{ std::filesystem::path() };
+        bool doubleClick{ false };
+    };
+
     class App
     {
     public:
@@ -64,8 +71,8 @@ namespace ic
         std::unique_ptr<Window> m_window;
         std::filesystem::path m_currentPathLeft{ std::filesystem::path("/") };
         std::filesystem::path m_currentPathRight{ std::filesystem::current_path() };
-        std::filesystem::path m_lastClickedLeft;
-        std::filesystem::path m_lastClickedRight;
+        PathClick m_lastClickedLeft;
+        PathClick m_lastClickedRight;
 
         //-------------------------------------------------
         // Init
