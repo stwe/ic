@@ -175,16 +175,18 @@ void ic::App::RenderLeft()
     // click on UP-DIR
     if (m_lastClickedLeft.id == 0)
     {
-        // update current path
-        m_currentPathLeft = m_currentPathLeft.parent_path();
+        // update current path if double click
+        if (m_lastClickedLeft.doubleClick)
+        {
+            m_currentPathLeft = m_currentPathLeft.parent_path();
+        }
 
         // reset clicked
-        m_lastClickedLeft.path = std::filesystem::path();
-        m_lastClickedLeft.id = -1;
+        m_lastClickedLeft = PathClick{};
     }
 
     // click on other
-    if (m_lastClickedLeft.id > 0 && std::filesystem::is_directory(m_lastClickedLeft.path))
+    if (m_lastClickedLeft.id > 0 && m_lastClickedLeft.doubleClick && std::filesystem::is_directory(m_lastClickedLeft.path))
     {
         m_currentPathLeft = m_lastClickedLeft.path;
     }
@@ -215,16 +217,18 @@ void ic::App::RenderRight()
     // click on UP-DIR
     if (m_lastClickedRight.id == 0)
     {
-        // update current path
-        m_currentPathRight = m_currentPathRight.parent_path();
+        // update current path if double click
+        if (m_lastClickedRight.doubleClick)
+        {
+            m_currentPathRight = m_currentPathRight.parent_path();
+        }
 
         // reset clicked
-        m_lastClickedRight.path = std::filesystem::path();
-        m_lastClickedRight.id = -1;
+        m_lastClickedRight = PathClick{};
     }
 
     // click on other
-    if (m_lastClickedRight.id > 0 && std::filesystem::is_directory(m_lastClickedRight.path))
+    if (m_lastClickedRight.id > 0 && m_lastClickedRight.doubleClick && std::filesystem::is_directory(m_lastClickedRight.path))
     {
         m_currentPathRight = m_lastClickedRight.path;
     }

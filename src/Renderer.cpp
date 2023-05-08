@@ -45,11 +45,11 @@ void ic::renderer::render_table(
                 ImGui::TableSetColumnIndex(column);
                 if (column == 0)
                 {
-                    if (ImGui::Selectable("/..", t_pathClick.id == 0))
+                    if (ImGui::Selectable("/..", t_pathClick.id == 0, ImGuiSelectableFlags_AllowDoubleClick))
                     {
                         t_pathClick.id = 0;
                         t_pathClick.path = std::filesystem::path();
-                        t_pathClick.doubleClick = false;
+                        t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
                     }
                 }
                 if (column == 1)
@@ -75,11 +75,11 @@ void ic::renderer::render_table(
                     {
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i))
+                            if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
                             {
                                 t_pathClick.id = i;
                                 t_pathClick.path = entry;
-                                t_pathClick.doubleClick = false;
+                                t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
                             }
                         }
                         else
@@ -98,11 +98,11 @@ void ic::renderer::render_table(
                             {
                                 pre = "~";
                             }
-                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i))
+                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
                             {
                                 t_pathClick.id  = i;
                                 t_pathClick.path = entry;
-                                t_pathClick.doubleClick = false;
+                                t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
                             }
                         }
                         else
