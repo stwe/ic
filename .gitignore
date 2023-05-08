@@ -34,3 +34,4 @@ cmake
 *.COL
 
 !/config.ini
+!/doc/*.png
