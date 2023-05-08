@@ -73,9 +73,14 @@ void ic::renderer::render_table(
                 {
                     if (is_regular_file(entry))
                     {
+                        std::string pre;
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
-                            if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+                            if (std::filesystem::is_symlink(entry))
+                            {
+                                pre = "@";
+                            }
+                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
                             {
                                 t_pathClick.id = i;
                                 t_pathClick.path = entry;
@@ -85,7 +90,7 @@ void ic::renderer::render_table(
                         else
                         {
                             ImGui::PushStyleColor(ImGuiCol_Text, Window::WARN_COLOR);
-                            ImGui::TextUnformatted(entry.filename().string().c_str());
+                            ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
                     }
@@ -142,15 +147,22 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
 {
     if (!t_pathClick.path.empty() && std::filesystem::is_regular_file(t_pathClick.path))
     {
-        ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
-        ImGui::SameLine();
-        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_pathClick.path)).c_str());
+        if (std::filesystem::is_symlink(t_pathClick.path))
+        {
+            ImGui::Text("%s", std::string("-> ").append(std::filesystem::read_symlink(t_pathClick.path).string()).c_str());
+        }
+        else
+        {
+            ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
+            ImGui::SameLine();
+            ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_pathClick.path)).c_str());
+        }
     }
     else if (!t_pathClick.path.empty() && std::filesystem::is_directory(t_pathClick.path))
     {
         if (std::filesystem::is_symlink(t_pathClick.path))
         {
-            ImGui::Text("%s", std::string("~").append(t_pathClick.path.filename().string()).c_str());
+            ImGui::Text("%s", std::string("-> ").append(std::filesystem::read_symlink(t_pathClick.path).string()).c_str());
         }
         else
         {
