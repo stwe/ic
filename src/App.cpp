@@ -73,15 +73,6 @@ void ic::App::Init()
 
 void ic::App::Render()
 {
-    ImGui::Begin(
-        "##app",
-        nullptr,
-        ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoSavedSettings
-    );
-
     RenderMainMenu();
     RenderLeft();
     RenderRight();
@@ -90,8 +81,6 @@ void ic::App::Render()
     RenderMainMenuButtons();
 
     //ImGui::ShowDemoWindow();
-
-    ImGui::End();
 }
 
 void ic::App::RenderMainMenu()
@@ -252,7 +241,7 @@ void ic::App::RenderRight()
 void ic::App::RenderLeftInfo()
 {
     ImGui::SetNextWindowPos({ 0.0f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f) });
-    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 4.0f });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 2.0f });
 
     ImGui::Begin(
         "##infoLeft",
@@ -271,7 +260,7 @@ void ic::App::RenderLeftInfo()
 void ic::App::RenderRightInfo()
 {
     ImGui::SetNextWindowPos({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f) });
-    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 4.0f });
+    ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 2.0f });
 
     ImGui::Begin(
         "##infoRight",
