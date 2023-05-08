@@ -116,16 +116,16 @@ void ic::Window::ConfigTheme()
 {
     IC_LOG_DEBUG("[Window::ConfigTheme()] Read color values from the config.ini file.");
 
-    auto windowBg{ App::INI.GetVector<float>("theme", "window_bg_color") };
-    auto text{ App::INI.GetVector<float>("theme", "text_color") };
-    auto titleBg{ App::INI.GetVector<float>("theme", "title_bg_color") };
-    auto titleBgActive{ App::INI.GetVector<float>("theme", "title_bg_active_color") };
-    auto border{ App::INI.GetVector<float>("theme", "border_color") };
-    auto headerHovered{ App::INI.GetVector<float>("theme", "header_hovered_color") };
-    auto menuBarBg{ App::INI.GetVector<float>("theme", "menu_bar_bg_color") };
-    auto warn{ App::INI.GetVector<float>("theme", "warn_color") };
+    const auto windowBg{ App::INI.GetVector<float>("theme", "window_bg_color") };
+    const auto text{ App::INI.GetVector<float>("theme", "text_color") };
+    const auto titleBg{ App::INI.GetVector<float>("theme", "title_bg_color") };
+    const auto titleBgActive{ App::INI.GetVector<float>("theme", "title_bg_active_color") };
+    const auto border{ App::INI.GetVector<float>("theme", "border_color") };
+    const auto headerHovered{ App::INI.GetVector<float>("theme", "header_hovered_color") };
+    const auto menuBarBg{ App::INI.GetVector<float>("theme", "menu_bar_bg_color") };
+    const auto warn{ App::INI.GetVector<float>("theme", "warn_color") };
 
-    std::vector<std::vector<float>> colors{
+    const std::vector<std::vector<float>> colors{
         windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn
     };
 
@@ -168,12 +168,20 @@ void ic::Window::InitImGui()
     style.Colors[ImGuiCol_Button] = title_bg_color;
     style.Colors[ImGuiCol_ButtonHovered] = header_hovered_color;
 
+    style.Alpha = App::INI.Get<float>("theme", "alpha");
+
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, m_sdlGlContext);
 
     const char* glslVersion = "#version 130";
     ImGui_ImplOpenGL3_Init(glslVersion);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    const auto clearColor{ App::INI.GetVector<float>("theme", "clear_color") };
+    if (clearColor.size() != 3)
+    {
+        throw IC_EXCEPTION("[Window::InitImGui()] Invalid color config.");
+    }
+
+    glClearColor(clearColor.at(0), clearColor.at(1), clearColor.at(2), 1.0f);
 }
 
 //-------------------------------------------------
