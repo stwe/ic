@@ -17,18 +17,25 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
-#include <algorithm>
+
 #if defined(_WIN64) && defined(_MSC_VER)
     #include <io.h>
-#else
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     #include <unistd.h>
+#else
+    #error Unsupported platform or compiler!
 #endif
+
 #include "FileSystem.h"
 #include "Renderer.h"
 #include "App.h"
 #include "Window.h"
 
-void ic::renderer::render_table(
+//-------------------------------------------------
+// Render
+//-------------------------------------------------
+
+void ic::renderer::render_view(
     const std::filesystem::path& t_from,
     const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
     PathClick& t_pathClick
@@ -49,12 +56,8 @@ void ic::renderer::render_table(
                 ImGui::TableSetColumnIndex(column);
                 if (column == 0)
                 {
-                    if (ImGui::Selectable("/..", t_pathClick.id == 0, ImGuiSelectableFlags_AllowDoubleClick))
-                    {
-                        t_pathClick.id = 0;
-                        t_pathClick.path = std::filesystem::path();
-                        t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-                    }
+                    auto click{ t_pathClick.id == 0 };
+                    add_selectable_field("/..", &click, t_pathClick, std::filesystem::path(), 0);
                 }
                 if (column == 1)
                 {
@@ -64,6 +67,7 @@ void ic::renderer::render_table(
         }
 
         int i{ 1 };
+        bool click{ false };
         for (const auto& entry : t_entries) // row
         {
             ImGui::PushID(i);
@@ -78,13 +82,9 @@ void ic::renderer::render_table(
                     if (is_regular_file(entry))
                     {
 #if defined(_WIN64) && defined(_MSC_VER)
-                        if (ImGui::Selectable(entry.filename().string().c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
-                        {
-                            t_pathClick.id = i;
-                            t_pathClick.path = entry;
-                            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-                        }
-#else
+                        click = (t_pathClick.id == i);
+                        add_selectable_field(entry.filename().string().c_str(), &click, t_pathClick, entry, i);
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
                         std::string pre;
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
@@ -105,6 +105,8 @@ void ic::renderer::render_table(
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
+#else
+    #error Unsupported platform or compiler!
 #endif
                     }
                     else if (std::filesystem::is_directory(entry))
@@ -130,15 +132,11 @@ void ic::renderer::render_table(
 
                             if (!test)
                             {
-                                if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
-                                {
-                                    t_pathClick.id = i;
-                                    t_pathClick.path = entry;
-                                    t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-                                }
+                                click = (t_pathClick.id == i);
+                                add_selectable_field(pre.append(entry.filename().string()).c_str(), &click, t_pathClick, entry, i);
                             }
                         }
-#else
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
                         if (access(entry.string().c_str(), R_OK) == 0) // todo
                         {
                             if (std::filesystem::is_symlink(entry))
@@ -158,6 +156,8 @@ void ic::renderer::render_table(
                             ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
                             ImGui::PopStyleColor(1);
                         }
+#else
+    #error Unsupported platform or compiler!
 #endif
                     }
                 }
@@ -214,6 +214,20 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
     }
 }
 
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void ic::renderer::add_selectable_field(const char* t_label, bool* t_selected, PathClick& t_pathClick, const std::filesystem::path& t_path, int t_id)
+{
+    if (ImGui::Selectable(t_label, t_selected, ImGuiSelectableFlags_AllowDoubleClick))
+    {
+        t_pathClick.id = t_id;
+        t_pathClick.path = t_path;
+        t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+    }
+}
+
 std::string ic::renderer::to_zero_lead(const std::string& t_time)
 {
     return std::string(2 - std::min(2, static_cast<int>(t_time.length())), '0') + t_time;
@@ -225,8 +239,10 @@ std::string ic::renderer::last_write_time_to_str(const std::filesystem::file_tim
 
 #if defined(_WIN64) && defined(_MSC_VER)
     ftsys = std::chrono::utc_clock::to_sys(std::chrono::file_clock::to_utc(t_fileTime));
-#else
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     ftsys = std::chrono::file_clock::to_sys(t_fileTime);
+#else
+    #error Unsupported platform or compiler!
 #endif
 
     time_t ftt{ std::chrono::system_clock::to_time_t(ftsys) };

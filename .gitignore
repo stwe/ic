@@ -5,6 +5,7 @@
 /obj/
 /cmake-build-debug/
 /cmake-build-release/
+/cmake-build-debug-visual-studio/
 build
 cmake
 

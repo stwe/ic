@@ -168,7 +168,7 @@ void ic::App::RenderLeft()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    renderer::render_table(
+    renderer::render_view(
         m_currentPathLeft,
         fs::read_from(m_currentPathLeft),
         m_lastClickedLeft
@@ -210,7 +210,7 @@ void ic::App::RenderRight()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    renderer::render_table(
+    renderer::render_view(
         m_currentPathRight,
         fs::read_from(m_currentPathRight),
         m_lastClickedRight

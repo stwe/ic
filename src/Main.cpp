@@ -40,7 +40,7 @@ int main()
     }
     catch (const ic::IcException& e)
     {
-        ic::Log::IC_LOG_ERROR("MdciiException {}", e.what());
+        ic::Log::IC_LOG_ERROR("IcException {}", e.what());
     }
     catch (const std::exception& e)
     {

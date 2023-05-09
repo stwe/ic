@@ -29,7 +29,11 @@ namespace ic
 
 namespace ic::renderer
 {
-    void render_table(
+    //-------------------------------------------------
+    // Render
+    //-------------------------------------------------
+
+    void render_view(
         const std::filesystem::path& t_from,
         const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
         PathClick& t_pathClick
@@ -37,6 +41,11 @@ namespace ic::renderer
 
     void render_clicked_path_info(const PathClick& t_pathClick);
 
+    //-------------------------------------------------
+    // Helper
+    //-------------------------------------------------
+
+    void add_selectable_field(const char* t_label, bool* t_selected, PathClick& t_pathClick, const std::filesystem::path& t_path, int t_id);
     std::string to_zero_lead(const std::string& t_time);
     std::string last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime);
     std::string get_human_readable_size(unsigned long t_bytes);
