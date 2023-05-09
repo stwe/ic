@@ -39,6 +39,11 @@ namespace ic::renderer
         PathClick& t_pathClick
     );
 
+    void render_header();
+    void render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick);
+    void render_files(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
+    void render_directories(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
+
     void render_clicked_path_info(const PathClick& t_pathClick);
 
     //-------------------------------------------------

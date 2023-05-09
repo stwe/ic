@@ -43,36 +43,18 @@ void ic::renderer::render_view(
 {
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableHeadersRow();
+        render_header();
+        render_first_row(t_from, t_pathClick);
 
-        if (fs::is_root(t_from))
-        {
-            ImGui::TableNextRow();
-            for (int column = 0; column < 3; column++)
-            {
-                ImGui::TableSetColumnIndex(column);
-                if (column == 0)
-                {
-                    auto click{ t_pathClick.id == 0 };
-                    add_selectable_field("/..", &click, t_pathClick, std::filesystem::path(), 0);
-                }
-                if (column == 1)
-                {
-                    ImGui::Text("UP--DIR");
-                }
-            }
-        }
-
-        int i{ 1 };
+        int id{ 1 };
         bool click{ false };
-        for (const auto& entry : t_entries) // row
+
+        for (const auto& entry : t_entries)
         {
-            ImGui::PushID(i);
+            ImGui::PushID(id);
 
             ImGui::TableNextRow();
+
             for (int column = 0; column < 3; column++)
             {
                 ImGui::TableSetColumnIndex(column);
@@ -81,97 +63,26 @@ void ic::renderer::render_view(
                 {
                     if (is_regular_file(entry))
                     {
-#if defined(_WIN64) && defined(_MSC_VER)
-                        click = (t_pathClick.id == i);
-                        add_selectable_field(entry.filename().string().c_str(), &click, t_pathClick, entry, i);
-#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-                        std::string pre;
-                        if (access(entry.string().c_str(), R_OK) == 0) // todo
-                        {
-                            if (std::filesystem::is_symlink(entry))
-                            {
-                                pre = "@";
-                            }
-                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
-                            {
-                                t_pathClick.id = i;
-                                t_pathClick.path = entry;
-                                t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-                            }
-                        }
-                        else
-                        {
-                            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-                            ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
-                            ImGui::PopStyleColor(1);
-                        }
-#else
-    #error Unsupported platform or compiler!
-#endif
+                        render_files(entry, &click, t_pathClick, id);
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
-                        std::string pre = "/";
-#if defined(_WIN64) && defined(_MSC_VER)
-                        if (_access(entry.string().c_str(), 4) == 0)
-                        {
-                            auto test{ false };
-
-                            try
-                            {
-                                if (std::filesystem::is_symlink(entry))
-                                {}
-                            }
-                            catch (std::filesystem::filesystem_error& e)
-                            {
-                                ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-                                ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
-                                ImGui::PopStyleColor(1);
-                                test = true;
-                            }
-
-                            if (!test)
-                            {
-                                click = (t_pathClick.id == i);
-                                add_selectable_field(pre.append(entry.filename().string()).c_str(), &click, t_pathClick, entry, i);
-                            }
-                        }
-#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-                        if (access(entry.string().c_str(), R_OK) == 0) // todo
-                        {
-                            if (std::filesystem::is_symlink(entry))
-                            {
-                                pre = "~";
-                            }
-                            if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
-                            {
-                                t_pathClick.id  = i;
-                                t_pathClick.path = entry;
-                                t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-                            }
-                        }
-                        else
-                        {
-                            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-                            ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
-                            ImGui::PopStyleColor(1);
-                        }
-#else
-    #error Unsupported platform or compiler!
-#endif
+                        render_directories(entry, &click, t_pathClick, id);
                     }
                 }
+
                 if (column == 1)
                 {
                     if (is_regular_file(entry))
                     {
-                        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(entry)).c_str());
+                        ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(entry))).c_str());
                     }
                     else
                     {
                         ImGui::Text("");
                     }
                 }
+
                 if (column == 2)
                 {
                     const auto fileTime{ std::filesystem::last_write_time(entry) };
@@ -180,10 +91,129 @@ void ic::renderer::render_view(
             }
 
             ImGui::PopID();
-            ++i;
+            ++id;
         }
+
         ImGui::EndTable();
     }
+}
+
+void ic::renderer::render_header()
+{
+    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+}
+
+void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick)
+{
+    if (fs::is_root(t_path))
+    {
+        ImGui::TableNextRow();
+
+        for (int column = 0; column < 3; column++)
+        {
+            ImGui::TableSetColumnIndex(column);
+
+            if (column == 0)
+            {
+                auto click{ t_pathClick.id == 0 };
+                add_selectable_field("/..", &click, t_pathClick, std::filesystem::path(), 0);
+            }
+
+            if (column == 1)
+            {
+                ImGui::Text("UP--DIR");
+            }
+        }
+    }
+}
+
+void ic::renderer::render_files(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, const int t_id)
+{
+#if defined(_WIN64) && defined(_MSC_VER)
+    *t_selected = (t_pathClick.id == t_id);
+    add_selectable_field(t_path.filename().string().c_str(), t_selected, t_pathClick, t_path, t_id);
+    // todo: symlinks
+    // todo: access
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+    // todo: access for symlinks + pre
+    std::string pre;
+    if (access(entry.string().c_str(), R_OK) == 0) // todo
+    {
+        if (std::filesystem::is_symlink(entry))
+        {
+            pre = "@";
+        }
+        if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            t_pathClick.id = i;
+            t_pathClick.path = entry;
+            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+        }
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
+        ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
+        ImGui::PopStyleColor(1);
+    }
+#else
+    #error Unsupported platform or compiler!
+#endif
+}
+
+void ic::renderer::render_directories(const std::filesystem::path& t_path, bool* t_selected, ic::PathClick& t_pathClick, const int t_id)
+{
+    std::string pre = "/";
+#if defined(_WIN64) && defined(_MSC_VER)
+    if (_access(t_path.string().c_str(), 4) == 0)
+    {
+        auto test{ false };
+
+        try
+        {
+            if (std::filesystem::is_symlink(t_path))
+            {}
+        }
+        catch (std::filesystem::filesystem_error& e)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
+            ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
+            ImGui::PopStyleColor(1);
+            test = true;
+        }
+
+        if (!test)
+        {
+            *t_selected = (t_pathClick.id == t_id);
+            add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
+        }
+    }
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+    if (access(entry.string().c_str(), R_OK) == 0) // todo
+    {
+        if (std::filesystem::is_symlink(entry))
+        {
+            pre = "~";
+        }
+        if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            t_pathClick.id  = i;
+            t_pathClick.path = entry;
+            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+        }
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
+        ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
+        ImGui::PopStyleColor(1);
+    }
+#else
+    #error Unsupported platform or compiler!
+#endif
 }
 
 void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
@@ -198,7 +228,7 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
         {
             ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
             ImGui::SameLine();
-            ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_pathClick.path)).c_str());
+            ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(t_pathClick.path))).c_str());
         }
     }
     else if (!t_pathClick.path.empty() && std::filesystem::is_directory(t_pathClick.path))
