@@ -41,8 +41,8 @@ namespace ic::renderer
 
     void render_header();
     void render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick);
-    void render_files(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
-    void render_directories(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
+    void render_file(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
+    void render_directory(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, int t_id);
 
     void render_clicked_path_info(const PathClick& t_pathClick);
 
@@ -54,4 +54,6 @@ namespace ic::renderer
     std::string to_zero_lead(const std::string& t_time);
     std::string last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime);
     std::string get_human_readable_size(unsigned long t_bytes);
+    std::string wstring_conv(const std::filesystem::path& t_path);
+    std::string float_to_string(float t_val);
 }

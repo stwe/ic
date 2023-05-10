@@ -19,7 +19,7 @@
 #include <imgui.h>
 
 #if defined(_WIN64) && defined(_MSC_VER)
-    #include <io.h>
+    #include <codecvt>
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     #include <unistd.h>
 #else
@@ -63,11 +63,11 @@ void ic::renderer::render_view(
                 {
                     if (is_regular_file(entry))
                     {
-                        render_files(entry, &click, t_pathClick, id);
+                        render_file(entry, &click, t_pathClick, id);
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
-                        render_directories(entry, &click, t_pathClick, id);
+                        render_directory(entry, &click, t_pathClick, id);
                     }
                 }
 
@@ -130,11 +130,11 @@ void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathCli
     }
 }
 
-void ic::renderer::render_files(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, const int t_id)
+void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, const int t_id)
 {
 #if defined(_WIN64) && defined(_MSC_VER)
     *t_selected = (t_pathClick.id == t_id);
-    add_selectable_field(t_path.filename().string().c_str(), t_selected, t_pathClick, t_path, t_id);
+    add_selectable_field(wstring_conv(t_path).c_str(), t_selected, t_pathClick, t_path, t_id);
     // todo: symlinks
     // todo: access
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
@@ -164,32 +164,28 @@ void ic::renderer::render_files(const std::filesystem::path& t_path, bool* t_sel
 #endif
 }
 
-void ic::renderer::render_directories(const std::filesystem::path& t_path, bool* t_selected, ic::PathClick& t_pathClick, const int t_id)
+void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t_selected, ic::PathClick& t_pathClick, const int t_id)
 {
     std::string pre = "/";
 #if defined(_WIN64) && defined(_MSC_VER)
-    if (_access(t_path.string().c_str(), 4) == 0)
+    auto test{ false };
+
+    try
     {
-        auto test{ false };
+        if (std::filesystem::is_symlink(t_path)) {}
+    }
+    catch (std::filesystem::filesystem_error& e)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
+        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
+        ImGui::PopStyleColor(1);
+        test = true;
+    }
 
-        try
-        {
-            if (std::filesystem::is_symlink(t_path))
-            {}
-        }
-        catch (std::filesystem::filesystem_error& e)
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-            ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
-            ImGui::PopStyleColor(1);
-            test = true;
-        }
-
-        if (!test)
-        {
-            *t_selected = (t_pathClick.id == t_id);
-            add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
-        }
+    if (!test)
+    {
+        *t_selected = (t_pathClick.id == t_id);
+        add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
     }
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     if (access(entry.string().c_str(), R_OK) == 0) // todo
@@ -226,7 +222,13 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
         }
         else
         {
+#if defined(_WIN64) && defined(_MSC_VER)
+            ImGui::Text("%s", wstring_conv(t_pathClick.path).c_str());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
             ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
+#else
+    #error Unsupported platform or compiler!
+#endif
             ImGui::SameLine();
             ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(t_pathClick.path))).c_str());
         }
@@ -239,7 +241,13 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
         }
         else
         {
+#if defined(_WIN64) && defined(_MSC_VER)
+            ImGui::Text("%s", std::string("/").append(wstring_conv(t_pathClick.path)).c_str());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
             ImGui::Text("%s", std::string("/").append(t_pathClick.path.filename().string()).c_str());
+#else
+    #error Unsupported platform or compiler!
+#endif
         }
     }
 }
@@ -298,16 +306,31 @@ std::string ic::renderer::get_human_readable_size(unsigned long t_bytes)
 
     if(auto bytes{ static_cast<float>(t_bytes) }; bytes > gb)
     {
-        return std::to_string(bytes / gb).append(" Gb ");
+        return float_to_string(bytes / gb).append(" Gb ");
     }
     else if(bytes > mb)
     {
-        return std::to_string(bytes / mb).append(" Mb ");
+        return float_to_string(bytes / mb).append(" Mb ");
     }
     else if(bytes > kb)
     {
-        return std::to_string(bytes / kb).append(" Kb ");
+        return float_to_string(bytes / kb).append(" Kb ");
     }
 
-    return std::to_string(t_bytes).append(" B ");
+    return float_to_string(t_bytes).append(" B ");
+}
+
+std::string ic::renderer::wstring_conv(const std::filesystem::path& t_path)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(t_path.filename().wstring());
+}
+
+std::string ic::renderer::float_to_string(const float t_val)
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(2) << t_val;
+    std::string result = oss.str();
+
+    return result;
 }
