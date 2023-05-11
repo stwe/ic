@@ -41,6 +41,7 @@ namespace ic
         //-------------------------------------------------
 
         inline static const inih::INIReader INI{ "./config.ini" };
+        inline static std::set<std::filesystem::path> root_paths;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

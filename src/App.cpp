@@ -64,6 +64,12 @@ void ic::App::Init()
         INI.Get<int>("window", "height")
     );
 
+    for (const auto drive : fs::get_available_drive_letters())
+    {
+        std::string label(1, drive);
+        root_paths.emplace(label.append(":\\"));
+    }
+
     IC_LOG_DEBUG("[App::Init()] The app was successfully initialized.");
 }
 
@@ -79,8 +85,6 @@ void ic::App::Render()
     RenderLeftInfo();
     RenderRightInfo();
     RenderMainMenuButtons();
-
-    //ImGui::ShowDemoWindow();
 }
 
 void ic::App::RenderMainMenu()
@@ -168,11 +172,21 @@ void ic::App::RenderLeft()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    renderer::render_view(
-        m_currentPathLeft,
-        fs::read_from(m_currentPathLeft),
-        m_lastClickedLeft
-    );
+    for (const auto drive : fs::get_available_drive_letters())
+    {
+        if (std::string label(1, drive); ImGui::Button(label.c_str()))
+        {
+            m_currentPathLeft = std::filesystem::path(label.append(":\\"));
+            m_lastClickedLeft = PathClick{};
+        }
+
+        ImGui::SameLine();
+    }
+
+    ImGui::NewLine();
+
+    // todo: no change -> no rendering
+    renderer::render_view(m_currentPathLeft, m_lastClickedLeft);
 
     // click on UP-DIR
     if (m_lastClickedLeft.id == 0)
@@ -210,11 +224,21 @@ void ic::App::RenderRight()
             ImGuiWindowFlags_NoSavedSettings
     );
 
-    renderer::render_view(
-        m_currentPathRight,
-        fs::read_from(m_currentPathRight),
-        m_lastClickedRight
-    );
+    for (const auto drive : fs::get_available_drive_letters())
+    {
+        if (std::string label(1, drive); ImGui::Button(label.c_str()))
+        {
+            m_currentPathRight = std::filesystem::path(label.append(":\\"));
+            m_lastClickedRight = PathClick{};
+        }
+
+        ImGui::SameLine();
+    }
+
+    ImGui::NewLine();
+
+    // todo: no change -> no rendering
+    renderer::render_view(m_currentPathRight, m_lastClickedRight);
 
     // click on UP-DIR
     if (m_lastClickedRight.id == 0)

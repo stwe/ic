@@ -33,11 +33,7 @@
 // Render
 //-------------------------------------------------
 
-void ic::renderer::render_view(
-    const std::filesystem::path& t_from,
-    const std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*>& t_entries,
-    PathClick& t_pathClick
-)
+void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t_pathClick)
 {
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
@@ -47,7 +43,7 @@ void ic::renderer::render_view(
         int id{ 1 };
         bool click{ false };
 
-        for (const auto& entry : t_entries)
+        for (const auto& entry : fs::read_from(t_from))
         {
             ImGui::PushID(id);
 
@@ -106,7 +102,7 @@ void ic::renderer::render_header()
 
 void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick)
 {
-    if (fs::is_root_directory(t_path))
+    if (!fs::is_root_directory(t_path, App::root_paths))
     {
         ImGui::TableNextRow();
 

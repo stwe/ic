@@ -19,8 +19,8 @@
 #include "FileSystem.h"
 
 #if defined(_WIN64) && defined(_MSC_VER)
-    #include <Windows.h>
     #include <Aclapi.h>
+    #include <ranges>
 #endif
 
 //-------------------------------------------------
@@ -57,9 +57,9 @@ std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*> ic::fs::read
 // Helper
 //-------------------------------------------------
 
-bool ic::fs::is_root_directory(const std::filesystem::path& t_path)
+bool ic::fs::is_root_directory(const std::filesystem::path& t_path, const std::set<std::filesystem::path>& t_rootPaths)
 {
-    return t_path != std::filesystem::path(std::filesystem::current_path().root_path());
+    return t_rootPaths.contains(t_path);
 }
 
 bool ic::fs::is_junction_directory(const std::wstring_view& t_path)
@@ -100,4 +100,15 @@ bool ic::fs::is_access_denied(const std::wstring_view& t_path)
     ) };
 
     return dwRes != ERROR_SUCCESS;
+}
+
+std::vector<char> ic::fs::get_available_drive_letters()
+{
+    const auto drives{ GetLogicalDrives() };
+
+    auto driveLetters = std::views::iota(0u, 26u)
+        | std::views::filter([drives](const int t_i) { return (drives & (1 << t_i)) != 0; })
+        | std::views::transform([](const int t_i) { return static_cast<char>('A' + t_i); });
+
+    return { driveLetters.begin(), driveLetters.end() };
 }

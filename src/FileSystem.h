@@ -35,8 +35,9 @@ namespace ic::fs
     // Helper
     //-------------------------------------------------
 
-    [[nodiscard]] bool is_root_directory(const std::filesystem::path& t_path);
+    [[nodiscard]] bool is_root_directory(const std::filesystem::path& t_path, const std::set<std::filesystem::path>& t_rootPaths);
     [[nodiscard]] bool is_junction_directory(const std::wstring_view& t_path);
     [[nodiscard]] bool is_hidden_directory(const std::wstring_view& t_path);
     [[nodiscard]] bool is_access_denied(const std::wstring_view& t_path);
+    [[nodiscard]] std::vector<char> get_available_drive_letters();
 }
