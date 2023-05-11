@@ -35,14 +35,16 @@ namespace ic
         int width;
         int height;
 
-        inline static ImVec4 window_bg_color{ ImVec4(0.0f, 0.0f, 0.66f, 1.00f) };
-        inline static ImVec4 text_color{ ImVec4(1.0f, 1.0f, 1.0f, 1.00f) };
-        inline static ImVec4 title_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.00f) };
-        inline static ImVec4 title_bg_active_color{ ImVec4(0.66f, 0.66f, 0.66f, 1.00f) };
-        inline static ImVec4 border_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.00f) };
+        inline static ImVec4 window_bg_color{ ImVec4(0.0f, 0.0f, 0.66f, 1.0f) };
+        inline static ImVec4 text_color{ ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
+        inline static ImVec4 title_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.0f) };
+        inline static ImVec4 title_bg_active_color{ ImVec4(0.66f, 0.66f, 0.66f, 1.0f) };
+        inline static ImVec4 border_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.0f) };
         inline static ImVec4 header_hovered_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.0f) };
         inline static ImVec4 menu_bar_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.0f) };
         inline static ImVec4 warn_color{ ImVec4(0.7f, 0.1f, 0.1f, 1.0f) };
+        inline static ImVec4 hidden_color{ ImVec4(1.0f, 1.0f, 1.0f, 0.7f) };
+        inline static ImVec4 symlink_color{ ImVec4(0.922f, 0.475f, 0.043f, 1.0f) };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

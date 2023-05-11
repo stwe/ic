@@ -23,9 +23,20 @@
 
 namespace ic::fs
 {
+    //-------------------------------------------------
+    // Read
+    //-------------------------------------------------
+
     bool path_comparator(const std::filesystem::path& t_p1, const std::filesystem::path& t_p2);
 
     std::set<std::filesystem::path, decltype(fs::path_comparator)*> read_from(const std::filesystem::path& t_path);
 
-    bool is_root(const std::filesystem::path& t_path);
+    //-------------------------------------------------
+    // Helper
+    //-------------------------------------------------
+
+    [[nodiscard]] bool is_root_directory(const std::filesystem::path& t_path);
+    [[nodiscard]] bool is_junction_directory(const std::wstring_view& t_path);
+    [[nodiscard]] bool is_hidden_directory(const std::wstring_view& t_path);
+    [[nodiscard]] bool is_access_denied(const std::wstring_view& t_path);
 }

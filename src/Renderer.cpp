@@ -22,8 +22,6 @@
     #include <codecvt>
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     #include <unistd.h>
-#else
-    #error Unsupported platform or compiler!
 #endif
 
 #include "FileSystem.h"
@@ -108,7 +106,7 @@ void ic::renderer::render_header()
 
 void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick)
 {
-    if (fs::is_root(t_path))
+    if (fs::is_root_directory(t_path))
     {
         ImGui::TableNextRow();
 
@@ -159,35 +157,50 @@ void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_sele
         ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
-#else
-    #error Unsupported platform or compiler!
 #endif
 }
 
 void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t_selected, ic::PathClick& t_pathClick, const int t_id)
 {
     std::string pre = "/";
-#if defined(_WIN64) && defined(_MSC_VER)
-    auto test{ false };
 
-    try
-    {
-        if (std::filesystem::is_symlink(t_path)) {}
-    }
-    catch (std::filesystem::filesystem_error& e)
+#if defined(_WIN64) && defined(_MSC_VER)
+
+    // skip some entries
+    if (fs::is_access_denied(t_path.wstring()))
     {
         ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
+        ImGui::TextUnformatted(pre.append(wstring_conv(t_path)).c_str());
         ImGui::PopStyleColor(1);
-        test = true;
+    }
+    else
+    {
+        // junction - not selectable
+        if (fs::is_junction_directory(t_path.wstring())) // todo: never used
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+            ImGui::TextUnformatted(pre.append(wstring_conv(t_path)).c_str());
+            ImGui::PopStyleColor(1);
+        }
+        // hidden - selectable, change color
+        else if (fs::is_hidden_directory(t_path.wstring()))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+
+            *t_selected = (t_pathClick.id == t_id);
+            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
+
+            ImGui::PopStyleColor(1);
+        }
+        else
+        {
+            *t_selected = (t_pathClick.id == t_id);
+            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
+        }
     }
 
-    if (!test)
-    {
-        *t_selected = (t_pathClick.id == t_id);
-        add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
-    }
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+
     if (access(entry.string().c_str(), R_OK) == 0) // todo
     {
         if (std::filesystem::is_symlink(entry))
@@ -207,8 +220,7 @@ void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t
         ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
-#else
-    #error Unsupported platform or compiler!
+
 #endif
 }
 
@@ -226,8 +238,6 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
             ImGui::Text("%s", wstring_conv(t_pathClick.path).c_str());
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
             ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
-#else
-    #error Unsupported platform or compiler!
 #endif
             ImGui::SameLine();
             ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(t_pathClick.path))).c_str());
@@ -245,8 +255,6 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
             ImGui::Text("%s", std::string("/").append(wstring_conv(t_pathClick.path)).c_str());
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
             ImGui::Text("%s", std::string("/").append(t_pathClick.path.filename().string()).c_str());
-#else
-    #error Unsupported platform or compiler!
 #endif
         }
     }
@@ -279,8 +287,6 @@ std::string ic::renderer::last_write_time_to_str(const std::filesystem::file_tim
     ftsys = std::chrono::utc_clock::to_sys(std::chrono::file_clock::to_utc(t_fileTime));
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     ftsys = std::chrono::file_clock::to_sys(t_fileTime);
-#else
-    #error Unsupported platform or compiler!
 #endif
 
     time_t ftt{ std::chrono::system_clock::to_time_t(ftsys) };
@@ -317,7 +323,7 @@ std::string ic::renderer::get_human_readable_size(unsigned long t_bytes)
         return float_to_string(bytes / kb).append(" Kb ");
     }
 
-    return float_to_string(t_bytes).append(" B ");
+    return float_to_string(static_cast<float>(t_bytes)).append(" B ");
 }
 
 std::string ic::renderer::wstring_conv(const std::filesystem::path& t_path)

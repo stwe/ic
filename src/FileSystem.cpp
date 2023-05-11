@@ -18,6 +18,15 @@
 
 #include "FileSystem.h"
 
+#if defined(_WIN64) && defined(_MSC_VER)
+    #include <Windows.h>
+    #include <Aclapi.h>
+#endif
+
+//-------------------------------------------------
+// Read
+//-------------------------------------------------
+
 bool ic::fs::path_comparator(const std::filesystem::path& t_p1, const std::filesystem::path& t_p2)
 {
     if (std::filesystem::is_directory(t_p1) && !std::filesystem::is_directory(t_p2))
@@ -44,7 +53,51 @@ std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*> ic::fs::read
     return results;
 }
 
-bool ic::fs::is_root(const std::filesystem::path& t_path)
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+bool ic::fs::is_root_directory(const std::filesystem::path& t_path)
 {
     return t_path != std::filesystem::path(std::filesystem::current_path().root_path());
+}
+
+bool ic::fs::is_junction_directory(const std::wstring_view& t_path)
+{
+    const auto attributes{ GetFileAttributesW(t_path.data()) };
+    if (attributes == INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    return (attributes & FILE_ATTRIBUTE_REPARSE_POINT) && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool ic::fs::is_hidden_directory(const std::wstring_view& t_path)
+{
+    const auto attributes{ GetFileAttributesW(t_path.data()) };
+    if (attributes == INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    return (attributes & FILE_ATTRIBUTE_HIDDEN) && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool ic::fs::is_access_denied(const std::wstring_view& t_path)
+{
+    PSECURITY_DESCRIPTOR sd{ nullptr };
+
+    const auto dwRes{ GetNamedSecurityInfoW(
+        t_path.data(),
+        SE_FILE_OBJECT,
+        DACL_SECURITY_INFORMATION,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        &sd
+    ) };
+
+    return dwRes != ERROR_SUCCESS;
 }
