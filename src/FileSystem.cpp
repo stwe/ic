@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "FileSystem.h"
+#include "Log.h"
 
 #if defined(_WIN64) && defined(_MSC_VER)
     #include <Aclapi.h>
@@ -44,6 +45,8 @@ bool ic::fs::path_comparator(const std::filesystem::path& t_p1, const std::files
 
 std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*> ic::fs::read_from(const std::filesystem::path& t_path)
 {
+    IC_LOG_DEBUG("[read_from] read files and directories ...");
+
     std::set<std::filesystem::path, decltype(fs::path_comparator)*> results(&fs::path_comparator);
     for (const auto& entry : std::filesystem::directory_iterator(t_path))
     {

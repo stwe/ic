@@ -33,7 +33,7 @@ namespace ic::renderer
     // Render
     //-------------------------------------------------
 
-    void render_view(const std::filesystem::path& t_from, PathClick& t_pathClick);
+    void render_view(const std::filesystem::path& t_from, PathClick& t_pathClick, const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries);
 
     void render_header();
     void render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick);

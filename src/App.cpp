@@ -160,6 +160,8 @@ void ic::App::RenderMainMenu()
 
 void ic::App::RenderLeft()
 {
+    static auto entries{ fs::read_from(m_currentPathLeft) };
+
     ImGui::SetNextWindowPos({ 0.0f, ImGui::GetFrameHeight() });
     ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
@@ -178,6 +180,7 @@ void ic::App::RenderLeft()
         {
             m_currentPathLeft = std::filesystem::path(label.append(":\\"));
             m_lastClickedLeft = PathClick{};
+            entries = fs::read_from(m_currentPathLeft);
         }
 
         ImGui::SameLine();
@@ -185,8 +188,7 @@ void ic::App::RenderLeft()
 
     ImGui::NewLine();
 
-    // todo: no change -> no rendering
-    renderer::render_view(m_currentPathLeft, m_lastClickedLeft);
+    renderer::render_view(m_currentPathLeft, m_lastClickedLeft, entries);
 
     // click on UP-DIR
     if (m_lastClickedLeft.id == 0)
@@ -195,6 +197,8 @@ void ic::App::RenderLeft()
         if (m_lastClickedLeft.doubleClick)
         {
             m_currentPathLeft = m_currentPathLeft.parent_path();
+            m_lastClickedLeft = PathClick{};
+            entries = fs::read_from(m_currentPathLeft);
         }
 
         // reset clicked
@@ -205,6 +209,8 @@ void ic::App::RenderLeft()
     if (m_lastClickedLeft.id > 0 && m_lastClickedLeft.doubleClick && std::filesystem::is_directory(m_lastClickedLeft.path))
     {
         m_currentPathLeft = m_lastClickedLeft.path;
+        m_lastClickedLeft = PathClick{};
+        entries = fs::read_from(m_currentPathLeft);
     }
 
     ImGui::End();
@@ -212,6 +218,8 @@ void ic::App::RenderLeft()
 
 void ic::App::RenderRight()
 {
+    static auto entries{ fs::read_from(m_currentPathRight) };
+
     ImGui::SetNextWindowPos({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() });
     ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
@@ -230,6 +238,7 @@ void ic::App::RenderRight()
         {
             m_currentPathRight = std::filesystem::path(label.append(":\\"));
             m_lastClickedRight = PathClick{};
+            entries = fs::read_from(m_currentPathRight);
         }
 
         ImGui::SameLine();
@@ -237,8 +246,7 @@ void ic::App::RenderRight()
 
     ImGui::NewLine();
 
-    // todo: no change -> no rendering
-    renderer::render_view(m_currentPathRight, m_lastClickedRight);
+    renderer::render_view(m_currentPathRight, m_lastClickedRight, entries);
 
     // click on UP-DIR
     if (m_lastClickedRight.id == 0)
@@ -247,6 +255,8 @@ void ic::App::RenderRight()
         if (m_lastClickedRight.doubleClick)
         {
             m_currentPathRight = m_currentPathRight.parent_path();
+            m_lastClickedRight = PathClick{};
+            entries = fs::read_from(m_currentPathRight);
         }
 
         // reset clicked
@@ -257,6 +267,8 @@ void ic::App::RenderRight()
     if (m_lastClickedRight.id > 0 && m_lastClickedRight.doubleClick && std::filesystem::is_directory(m_lastClickedRight.path))
     {
         m_currentPathRight = m_lastClickedRight.path;
+        m_lastClickedRight = PathClick{};
+        entries = fs::read_from(m_currentPathRight);
     }
 
     ImGui::End();
