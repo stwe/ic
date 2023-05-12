@@ -66,6 +66,7 @@ bool ic::fs::is_root_directory(const std::filesystem::path& t_path, const std::s
 }
 
 #if defined(_WIN64) && defined(_MSC_VER)
+
 bool ic::fs::is_junction_directory(const std::wstring_view& t_path)
 {
     const auto attributes{ GetFileAttributesW(t_path.data()) };
@@ -116,4 +117,12 @@ std::vector<char> ic::fs::get_available_drive_letters()
 
     return { driveLetters.begin(), driveLetters.end() };
 }
+
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+
+bool ic::fs::is_hidden(const std::filesystem::path& t_path)
+{
+    return !t_path.empty() && t_path.filename().string().front() == '.';
+}
+
 #endif

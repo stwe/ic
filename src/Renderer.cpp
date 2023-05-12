@@ -127,25 +127,33 @@ void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathCli
 void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, const int t_id)
 {
 #if defined(_WIN64) && defined(_MSC_VER)
+
     *t_selected = (t_pathClick.id == t_id);
     add_selectable_field(wstring_conv(t_path).c_str(), t_selected, t_pathClick, t_path, t_id);
-    // todo: symlinks
-    // todo: access
+
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-    // todo: access for symlinks + pre
+
     std::string pre;
-    if (access(t_path.string().c_str(), R_OK) == 0) // todo
+    if (access(t_path.string().c_str(), R_OK) == 0)
     {
+        *t_selected = (t_pathClick.id == t_id);
+
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "@";
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
         }
-        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), t_pathClick.id == t_id, ImGuiSelectableFlags_AllowDoubleClick))
+        else if (fs::is_hidden(t_path))
         {
-            t_pathClick.id = t_id;
-            t_pathClick.path = t_path;
-            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
         }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+        }
+
+        add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
+        ImGui::PopStyleColor(1);
     }
     else
     {
@@ -153,6 +161,7 @@ void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_sele
         ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
+
 #endif
 }
 
@@ -197,21 +206,34 @@ void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t
 
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
 
-    if (access(t_path.string().c_str(), R_OK) == 0) // todo
+    if (access(t_path.string().c_str(), R_OK) == 0)
+    {
+        *t_selected = (t_pathClick.id == t_id);
+
+        if (std::filesystem::is_symlink(t_path))
+        {
+            pre = "~";
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+        }
+        else if (fs::is_hidden(t_path))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+        }
+
+        add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
+        ImGui::PopStyleColor(1);
+    }
+    else
     {
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "~";
         }
-        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), t_pathClick.id == t_id, ImGuiSelectableFlags_AllowDoubleClick))
-        {
-            t_pathClick.id  = t_id;
-            t_pathClick.path = t_path;
-            t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
-        }
-    }
-    else
-    {
+
         ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
         ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
