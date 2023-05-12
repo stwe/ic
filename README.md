@@ -4,7 +4,7 @@ Playing around with std::filesystem and ImGui for education purposes. A simple f
 
 **!Do not use this program in your productive environment!**
 
-<img src="https://github.com/stwe/ic/blob/main/doc/2023-05-08.png" width="500" height="400" alt="" />
+<img src="https://github.com/stwe/ic/blob/main/doc/2023-05-12.png" width="500" height="400" alt="" />
 
 ## Requirements
 
