@@ -76,11 +76,10 @@ void ic::App::Init()
 
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
 
-    root_paths.emplace("/")
+    root_paths.emplace("/");
 
 #else
     #error Unsupported platform or compiler!
-
 #endif
 
     IC_ASSERT(!root_paths.empty(), "[App::Init()] Invalid number of root paths.")
@@ -189,6 +188,7 @@ void ic::App::RenderLeft()
             ImGuiWindowFlags_NoSavedSettings
     );
 
+#if defined(_WIN64) && defined(_MSC_VER)
     for (const auto drive : fs::get_available_drive_letters())
     {
         if (std::string label(1, drive); ImGui::Button(label.c_str()))
@@ -200,6 +200,7 @@ void ic::App::RenderLeft()
 
         ImGui::SameLine();
     }
+#endif
 
     ImGui::NewLine();
 
@@ -247,6 +248,7 @@ void ic::App::RenderRight()
             ImGuiWindowFlags_NoSavedSettings
     );
 
+#if defined(_WIN64) && defined(_MSC_VER)
     for (const auto drive : fs::get_available_drive_letters())
     {
         if (std::string label(1, drive); ImGui::Button(label.c_str()))
@@ -258,6 +260,7 @@ void ic::App::RenderRight()
 
         ImGui::SameLine();
     }
+#endif
 
     ImGui::NewLine();
 

@@ -134,23 +134,23 @@ void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_sele
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     // todo: access for symlinks + pre
     std::string pre;
-    if (access(entry.string().c_str(), R_OK) == 0) // todo
+    if (access(t_path.string().c_str(), R_OK) == 0) // todo
     {
-        if (std::filesystem::is_symlink(entry))
+        if (std::filesystem::is_symlink(t_path))
         {
             pre = "@";
         }
-        if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), t_pathClick.id == t_id, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            t_pathClick.id = i;
-            t_pathClick.path = entry;
+            t_pathClick.id = t_id;
+            t_pathClick.path = t_path;
             t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
         }
     }
     else
     {
         ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-        ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
+        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
 #endif
@@ -197,23 +197,23 @@ void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t
 
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
 
-    if (access(entry.string().c_str(), R_OK) == 0) // todo
+    if (access(t_path.string().c_str(), R_OK) == 0) // todo
     {
-        if (std::filesystem::is_symlink(entry))
+        if (std::filesystem::is_symlink(t_path))
         {
             pre = "~";
         }
-        if (ImGui::Selectable(pre.append(entry.filename().string()).c_str(), t_pathClick.id == i, ImGuiSelectableFlags_AllowDoubleClick))
+        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), t_pathClick.id == t_id, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            t_pathClick.id  = i;
-            t_pathClick.path = entry;
+            t_pathClick.id  = t_id;
+            t_pathClick.path = t_path;
             t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
         }
     }
     else
     {
         ImGui::PushStyleColor(ImGuiCol_Text, Window::warn_color);
-        ImGui::TextUnformatted(pre.append(entry.filename().string()).c_str());
+        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
 
