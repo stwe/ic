@@ -43,6 +43,8 @@ namespace ic
         inline static ImVec4 header_hovered_color{ ImVec4(0.3f, 0.3f, 0.3f, 1.0f) };
         inline static ImVec4 menu_bar_bg_color{ ImVec4(0.0f, 0.66f, 0.66f, 1.0f) };
         inline static ImVec4 warn_color{ ImVec4(0.7f, 0.1f, 0.1f, 1.0f) };
+        inline static ImVec4 clear_color{ ImVec4(0.2f, 0.2f, 0.7f, 1.0f) };
+        inline static float alpha{ 1.0f };
         inline static ImVec4 hidden_color{ ImVec4(1.0f, 1.0f, 1.0f, 0.7f) };
         inline static ImVec4 symlink_color{ ImVec4(0.922f, 0.475f, 0.043f, 1.0f) };
 
@@ -78,6 +80,13 @@ namespace ic
 
     private:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        static constexpr int MIN_WIDTH{ 320 };
+        static constexpr int MIN_HEIGHT{ 200 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -89,7 +98,7 @@ namespace ic
         //-------------------------------------------------
 
         void InitSdl();
-        void ConfigTheme();
+        static void ConfigTheme();
         void InitImGui();
 
         //-------------------------------------------------

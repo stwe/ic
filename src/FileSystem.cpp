@@ -45,7 +45,7 @@ bool ic::fs::path_comparator(const std::filesystem::path& t_p1, const std::files
 
 std::set<std::filesystem::path, decltype(ic::fs::path_comparator)*> ic::fs::read_from(const std::filesystem::path& t_path)
 {
-    IC_LOG_DEBUG("[read_from] read files and directories ...");
+    IC_LOG_DEBUG("[read_from] read from {} ...", t_path.filename().string());
 
     std::set<std::filesystem::path, decltype(fs::path_comparator)*> results(&fs::path_comparator);
     for (const auto& entry : std::filesystem::directory_iterator(t_path))
@@ -65,6 +65,7 @@ bool ic::fs::is_root_directory(const std::filesystem::path& t_path, const std::s
     return t_rootPaths.contains(t_path);
 }
 
+#if defined(_WIN64) && defined(_MSC_VER)
 bool ic::fs::is_junction_directory(const std::wstring_view& t_path)
 {
     const auto attributes{ GetFileAttributesW(t_path.data()) };
@@ -115,3 +116,4 @@ std::vector<char> ic::fs::get_available_drive_letters()
 
     return { driveLetters.begin(), driveLetters.end() };
 }
+#endif

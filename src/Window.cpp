@@ -78,6 +78,11 @@ void ic::Window::InitSdl()
 {
     IC_LOG_DEBUG("[Window::InitSdl()] Initializing SDL.");
 
+    if (width < MIN_WIDTH || height < MIN_HEIGHT)
+    {
+        throw IC_EXCEPTION("[Window::InitSdl()] Invalid window size..");
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         throw IC_EXCEPTION("[Window::InitSdl()] Unable to initialize SDL.");
@@ -124,9 +129,12 @@ void ic::Window::ConfigTheme()
     const auto headerHovered{ App::INI.GetVector<float>("theme", "header_hovered_color") };
     const auto menuBarBg{ App::INI.GetVector<float>("theme", "menu_bar_bg_color") };
     const auto warn{ App::INI.GetVector<float>("theme", "warn_color") };
+    const auto clear{ App::INI.GetVector<float>("theme", "clear_color") };
+    const auto hidden{ App::INI.GetVector<float>("theme", "hidden_color") };
+    const auto symlink{ App::INI.GetVector<float>("theme", "symlink_color") };
 
     const std::vector<std::vector<float>> colors{
-        windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn
+        windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn, clear, symlink
     };
 
     for (const auto& col : colors)
@@ -137,6 +145,11 @@ void ic::Window::ConfigTheme()
         }
     }
 
+    if (hidden.size() != 4)
+    {
+        throw IC_EXCEPTION("[Window::ConfigTheme()] Invalid color config.");
+    }
+
     window_bg_color = ImVec4(windowBg.at(0), windowBg.at(1), windowBg.at(2), 1.0f);
     text_color = ImVec4(text.at(0), text.at(1), text.at(2), 1.0f);
     title_bg_color = ImVec4(titleBg.at(0), titleBg.at(1), titleBg.at(2), 1.0f);
@@ -145,6 +158,10 @@ void ic::Window::ConfigTheme()
     header_hovered_color = ImVec4(headerHovered.at(0), headerHovered.at(1), headerHovered.at(2), 1.0f);
     menu_bar_bg_color = ImVec4(menuBarBg.at(0), menuBarBg.at(1), menuBarBg.at(2), 1.0f);
     warn_color = ImVec4(warn.at(0), warn.at(1), warn.at(2), 1.0f);
+    clear_color = ImVec4(clear.at(0), clear.at(1), clear.at(2), 1.0f);
+    alpha = App::INI.Get<float>("theme", "alpha");
+    hidden_color = ImVec4(hidden.at(0), hidden.at(1), hidden.at(2), hidden.at(3));
+    symlink_color = ImVec4(symlink.at(0), symlink.at(1), symlink.at(2), 1.0f);
 }
 
 void ic::Window::InitImGui()
@@ -167,21 +184,14 @@ void ic::Window::InitImGui()
     style.Colors[ImGuiCol_MenuBarBg] = menu_bar_bg_color;
     style.Colors[ImGuiCol_Button] = title_bg_color;
     style.Colors[ImGuiCol_ButtonHovered] = header_hovered_color;
-
-    style.Alpha = App::INI.Get<float>("theme", "alpha");
+    style.Alpha = alpha;
 
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, m_sdlGlContext);
 
     const char* glslVersion = "#version 130";
     ImGui_ImplOpenGL3_Init(glslVersion);
 
-    const auto clearColor{ App::INI.GetVector<float>("theme", "clear_color") };
-    if (clearColor.size() != 3)
-    {
-        throw IC_EXCEPTION("[Window::InitImGui()] Invalid color config.");
-    }
-
-    glClearColor(clearColor.at(0), clearColor.at(1), clearColor.at(2), 1.0f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
 }
 
 //-------------------------------------------------

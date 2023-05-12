@@ -50,6 +50,9 @@ namespace ic::renderer
     std::string to_zero_lead(const std::string& t_time);
     std::string last_write_time_to_str(const std::filesystem::file_time_type& t_fileTime);
     std::string get_human_readable_size(unsigned long t_bytes);
-    std::string wstring_conv(const std::filesystem::path& t_path);
     std::string float_to_string(float t_val);
+
+#if defined(_WIN64) && defined(_MSC_VER)
+    std::string wstring_conv(const std::filesystem::path& t_path);
+#endif
 }

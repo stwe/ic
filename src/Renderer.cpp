@@ -322,12 +322,6 @@ std::string ic::renderer::get_human_readable_size(unsigned long t_bytes)
     return float_to_string(static_cast<float>(t_bytes)).append(" B ");
 }
 
-std::string ic::renderer::wstring_conv(const std::filesystem::path& t_path)
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    return converter.to_bytes(t_path.filename().wstring());
-}
-
 std::string ic::renderer::float_to_string(const float t_val)
 {
     std::ostringstream oss;
@@ -336,3 +330,11 @@ std::string ic::renderer::float_to_string(const float t_val)
 
     return result;
 }
+
+#if defined(_WIN64) && defined(_MSC_VER)
+std::string ic::renderer::wstring_conv(const std::filesystem::path& t_path)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(t_path.filename().wstring());
+}
+#endif

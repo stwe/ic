@@ -18,10 +18,10 @@
 
 #include <imgui_internal.h>
 #include "App.h"
-#include "Log.h"
 #include "Window.h"
 #include "FileSystem.h"
 #include "Renderer.h"
+#include "IcAssert.h"
 #include "vendor/imgui/imgui_impl_sdl2.h"
 
 //-------------------------------------------------
@@ -64,11 +64,26 @@ void ic::App::Init()
         INI.Get<int>("window", "height")
     );
 
+#if defined(_WIN64) && defined(_MSC_VER)
+
     for (const auto drive : fs::get_available_drive_letters())
     {
         std::string label(1, drive);
         root_paths.emplace(label.append(":\\"));
+
+        IC_LOG_DEBUG("[App::Init()] Found {} drive letters.", root_paths.size());
     }
+
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+
+    root_paths.emplace("/")
+
+#else
+    #error Unsupported platform or compiler!
+
+#endif
+
+    IC_ASSERT(!root_paths.empty(), "[App::Init()] Invalid number of root paths.")
 
     IC_LOG_DEBUG("[App::Init()] The app was successfully initialized.");
 }
@@ -96,7 +111,7 @@ void ic::App::RenderMainMenu()
     if (ImGui::BeginMainMenuBar())
     {
         ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
         if (ImGui::BeginMenu("Left"))
         {
             if (ImGui::MenuItem("File listing", "CTRL+G"))
@@ -125,7 +140,7 @@ void ic::App::RenderMainMenu()
         }
 
         ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
         if (ImGui::BeginMenu("Command"))
         {
             ImGui::EndMenu();
@@ -342,7 +357,7 @@ void ic::App::RenderMainMenuButtons()
     }
 
     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
     ImGui::SameLine();
     if (ImGui::Button("Menu")) {}
     ImGui::SameLine();
