@@ -43,7 +43,7 @@ namespace ic
 #ifdef IC_DEBUG_BUILD
             m_logger->set_level(spdlog::level::trace);
 #else
-            logger->set_level(spdlog::level::info);
+            m_logger->set_level(spdlog::level::info);
 #endif
         }
 
