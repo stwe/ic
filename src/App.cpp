@@ -204,7 +204,14 @@ void ic::App::RenderLeft()
 
     ImGui::NewLine();
 
-    renderer::render_view(m_currentPathLeft, m_lastClickedLeft, entries);
+    renderer::render_view(
+        ic::Side::LEFT,
+        m_currentPathLeft,
+        m_lastClickedLeft,
+        entries,
+        m_selectedFileIdsLeft,
+        m_selectedDirectoryIdsLeft
+    );
 
     // click on UP-DIR
     if (m_lastClickedLeft.id == 0)
@@ -214,6 +221,10 @@ void ic::App::RenderLeft()
         {
             m_currentPathLeft = m_currentPathLeft.parent_path();
             m_lastClickedLeft = PathClick{};
+
+            m_selectedFileIdsLeft.clear();
+            m_selectedDirectoryIdsLeft.clear();
+
             entries = fs::read_from(m_currentPathLeft);
         }
 
@@ -221,11 +232,15 @@ void ic::App::RenderLeft()
         m_lastClickedLeft = PathClick{};
     }
 
-    // click on other
+    // click on other -> DOWN-DIR
     if (m_lastClickedLeft.id > 0 && m_lastClickedLeft.doubleClick && std::filesystem::is_directory(m_lastClickedLeft.path))
     {
         m_currentPathLeft = m_lastClickedLeft.path;
         m_lastClickedLeft = PathClick{};
+
+        m_selectedFileIdsLeft.clear();
+        m_selectedDirectoryIdsLeft.clear();
+
         entries = fs::read_from(m_currentPathLeft);
     }
 
@@ -264,7 +279,14 @@ void ic::App::RenderRight()
 
     ImGui::NewLine();
 
-    renderer::render_view(m_currentPathRight, m_lastClickedRight, entries);
+    renderer::render_view(
+        ic::Side::RIGHT,
+        m_currentPathRight,
+        m_lastClickedRight,
+        entries,
+        m_selectedFileIdsRight,
+        m_selectedDirectoryIdsRight
+    );
 
     // click on UP-DIR
     if (m_lastClickedRight.id == 0)
@@ -274,6 +296,10 @@ void ic::App::RenderRight()
         {
             m_currentPathRight = m_currentPathRight.parent_path();
             m_lastClickedRight = PathClick{};
+
+            m_selectedFileIdsRight.clear();
+            m_selectedDirectoryIdsRight.clear();
+
             entries = fs::read_from(m_currentPathRight);
         }
 
@@ -286,6 +312,10 @@ void ic::App::RenderRight()
     {
         m_currentPathRight = m_lastClickedRight.path;
         m_lastClickedRight = PathClick{};
+
+        m_selectedFileIdsRight.clear();
+        m_selectedDirectoryIdsRight.clear();
+
         entries = fs::read_from(m_currentPathRight);
     }
 

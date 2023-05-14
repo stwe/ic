@@ -28,12 +28,20 @@
 #include "Renderer.h"
 #include "App.h"
 #include "Window.h"
+#include "Log.h"
 
 //-------------------------------------------------
 // Render
 //-------------------------------------------------
 
-void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t_pathClick, const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries)
+void ic::renderer::render_view(
+    Side t_side,
+    const std::filesystem::path& t_from,
+    PathClick& t_pathClick,
+    const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
+    std::set<int>& t_selectedFileIds,
+    std::set<int>& t_selectedDirectoryIds
+)
 {
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
@@ -41,8 +49,6 @@ void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t
         render_first_row(t_from, t_pathClick);
 
         int id{ 1 };
-        bool click{ false };
-
         for (const auto& entry : t_entries)
         {
             ImGui::PushID(id);
@@ -57,11 +63,11 @@ void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t
                 {
                     if (is_regular_file(entry))
                     {
-                        render_file(entry, &click, t_pathClick, id);
+                        render_file(entry, false, t_pathClick, id, t_selectedFileIds);
                     }
                     else if (std::filesystem::is_directory(entry))
                     {
-                        render_directory(entry, &click, t_pathClick, id);
+                        render_directory(entry, false, t_pathClick, id, t_selectedDirectoryIds);
                     }
                 }
 
@@ -69,7 +75,7 @@ void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t
                 {
                     if (is_regular_file(entry))
                     {
-                        ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(entry))).c_str());
+                        ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(entry)).c_str());
                     }
                     else
                     {
@@ -87,6 +93,10 @@ void ic::renderer::render_view(const std::filesystem::path& t_from, PathClick& t
             ImGui::PopID();
             ++id;
         }
+
+#ifdef IC_DEBUG_BUILD
+        render_debug(t_side, t_selectedFileIds, t_selectedDirectoryIds);
+#endif
 
         ImGui::EndTable();
     }
@@ -112,8 +122,10 @@ void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathCli
 
             if (column == 0)
             {
-                auto click{ t_pathClick.id == 0 };
-                add_selectable_field("/..", &click, t_pathClick, std::filesystem::path(), 0);
+                // todo
+                auto focus{ t_pathClick.id == 0 };
+                std::set<int> tmp;
+                add_selectable_field("/..", &focus, t_pathClick, std::filesystem::path(), 0, tmp);
             }
 
             if (column == 1)
@@ -124,7 +136,13 @@ void ic::renderer::render_first_row(const std::filesystem::path& t_path, PathCli
     }
 }
 
-void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_selected, PathClick& t_pathClick, const int t_id)
+void ic::renderer::render_file(
+    const std::filesystem::path& t_path,
+    const bool t_focus,
+    PathClick& t_pathClick,
+    const int t_id,
+    std::set<int>& t_selectedFileIds
+)
 {
 #if defined(_WIN64) && defined(_MSC_VER)
 
@@ -136,23 +154,43 @@ void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_sele
     std::string pre;
     if (access(t_path.string().c_str(), R_OK) == 0)
     {
-        *t_selected = (t_pathClick.id == t_id);
-
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "@";
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+            if (t_selectedFileIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+            }
         }
         else if (fs::is_hidden(t_path))
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            if (t_selectedFileIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            }
         }
         else
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+            if (t_selectedFileIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+            }
         }
 
-        add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
+        bool focus{ t_focus };
+        add_selectable_field(pre.append(t_path.filename().string()).c_str(), &focus, t_pathClick, t_path, t_id, t_selectedFileIds);
         ImGui::PopStyleColor(1);
     }
     else
@@ -165,7 +203,13 @@ void ic::renderer::render_file(const std::filesystem::path& t_path, bool* t_sele
 #endif
 }
 
-void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t_selected, ic::PathClick& t_pathClick, const int t_id)
+void ic::renderer::render_directory(
+    const std::filesystem::path& t_path,
+    const bool t_focus,
+    ic::PathClick& t_pathClick,
+    const int t_id,
+    std::set<int>& t_selectedDirectoryIds
+)
 {
     std::string pre = "/";
 
@@ -208,23 +252,43 @@ void ic::renderer::render_directory(const std::filesystem::path& t_path, bool* t
 
     if (access(t_path.string().c_str(), R_OK) == 0)
     {
-        *t_selected = (t_pathClick.id == t_id);
-
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "~";
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+            if (t_selectedDirectoryIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::symlink_color);
+            }
         }
         else if (fs::is_hidden(t_path))
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            if (t_selectedDirectoryIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            }
         }
         else
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+            if (t_selectedDirectoryIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+            }
         }
 
-        add_selectable_field(pre.append(t_path.filename().string()).c_str(), t_selected, t_pathClick, t_path, t_id);
+        bool focus{ t_focus };
+        add_selectable_field(pre.append(t_path.filename().string()).c_str(), &focus, t_pathClick, t_path, t_id, t_selectedDirectoryIds);
         ImGui::PopStyleColor(1);
     }
     else
@@ -258,7 +322,7 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
             ImGui::Text("%s", t_pathClick.path.filename().string().c_str());
 #endif
             ImGui::SameLine();
-            ImGui::Text("%s", get_human_readable_size(static_cast<unsigned long>(std::filesystem::file_size(t_pathClick.path))).c_str());
+            ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(t_pathClick.path)).c_str());
         }
     }
     else if (!t_pathClick.path.empty() && std::filesystem::is_directory(t_pathClick.path))
@@ -282,13 +346,26 @@ void ic::renderer::render_clicked_path_info(const PathClick& t_pathClick)
 // Helper
 //-------------------------------------------------
 
-void ic::renderer::add_selectable_field(const char* t_label, bool* t_selected, PathClick& t_pathClick, const std::filesystem::path& t_path, int t_id)
+void ic::renderer::add_selectable_field(
+    const char* t_label,
+    bool* t_focus,
+    PathClick& t_pathClick,
+    const std::filesystem::path& t_path,
+    int t_id, std::set<int>& t_selectedIds
+)
 {
-    if (ImGui::Selectable(t_label, t_selected, ImGuiSelectableFlags_AllowDoubleClick))
+    if (ImGui::Selectable(t_label, t_focus, ImGuiSelectableFlags_AllowDoubleClick))
     {
         t_pathClick.id = t_id;
         t_pathClick.path = t_path;
         t_pathClick.doubleClick = ImGui::IsMouseDoubleClicked(0);
+
+        if (ImGui::GetIO().KeyShift && t_id != 0)
+        {
+            IC_LOG_DEBUG("Add {}", t_id);
+            t_selectedIds.emplace(t_id);
+            *t_focus = true;
+        }
     }
 }
 
@@ -358,5 +435,44 @@ std::string ic::renderer::wstring_conv(const std::filesystem::path& t_path)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.to_bytes(t_path.filename().wstring());
+}
+#endif
+
+#ifdef IC_DEBUG_BUILD
+void ic::renderer::render_debug(Side t_side, const std::set<int>& t_selectedFileIds, const std::set<int>& t_selectedDirectoryIds)
+{
+    ImGui::Separator();
+    ImGui::Text("DEBUG");
+    ImGui::Separator();
+    if (!t_selectedFileIds.empty())
+    {
+        ImGui::Text("Side: %s", t_side == Side::LEFT ? "left" : "right");
+        for (const auto id : t_selectedFileIds)
+        {
+            ImGui::Text("file id: %d, entries: %zu", id, t_selectedFileIds.size());
+        }
+    }
+    else
+    {
+        ImGui::Text("No file is selected.");
+        ImGui::Text("Use Shift+LeftMouseBtn");
+    }
+
+    ImGui::Separator();
+    if (!t_selectedDirectoryIds.empty())
+    {
+        ImGui::Text("Side: %s", t_side == Side::LEFT ? "left" : "right");
+        for (const auto id : t_selectedDirectoryIds)
+        {
+            ImGui::Text("dir id: %d, entries: %zu", id, t_selectedDirectoryIds.size());
+        }
+    }
+    else
+    {
+        ImGui::Text("No directory is selected.");
+        ImGui::Text("Use Shift+LeftMouseBtn");
+    }
+
+    ImGui::Separator();
 }
 #endif

@@ -33,6 +33,11 @@ namespace ic
         bool doubleClick{ false };
     };
 
+    enum class Side
+    {
+        LEFT, RIGHT
+    };
+
     class App
     {
     public:
@@ -76,6 +81,12 @@ namespace ic
 
         PathClick m_lastClickedLeft;
         PathClick m_lastClickedRight;
+
+        std::set<int> m_selectedFileIdsLeft;
+        std::set<int> m_selectedFileIdsRight;
+
+        std::set<int> m_selectedDirectoryIdsLeft;
+        std::set<int> m_selectedDirectoryIdsRight;
 
         //-------------------------------------------------
         // Init
