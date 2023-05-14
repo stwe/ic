@@ -146,8 +146,19 @@ void ic::renderer::render_file(
 {
 #if defined(_WIN64) && defined(_MSC_VER)
 
-    *t_selected = (t_pathClick.id == t_id);
-    add_selectable_field(wstring_conv(t_path).c_str(), t_selected, t_pathClick, t_path, t_id);
+    if (t_selectedFileIds.contains(t_id))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+    }
+
+    bool focus{ t_focus };
+    add_selectable_field(wstring_conv(t_path).c_str(), &focus, t_pathClick, t_path, t_id, t_selectedFileIds);
+
+    ImGui::PopStyleColor(1);
 
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
 
@@ -224,6 +235,8 @@ void ic::renderer::render_directory(
     }
     else
     {
+        bool focus{ t_focus };
+
         // junction - not selectable
         if (fs::is_junction_directory(t_path.wstring())) // todo: never used
         {
@@ -234,17 +247,33 @@ void ic::renderer::render_directory(
         // hidden - selectable, change color
         else if (fs::is_hidden_directory(t_path.wstring()))
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            if (t_selectedDirectoryIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::hidden_color);
+            }
 
-            *t_selected = (t_pathClick.id == t_id);
-            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
+            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), &focus, t_pathClick, t_path, t_id, t_selectedDirectoryIds);
 
             ImGui::PopStyleColor(1);
         }
         else
         {
-            *t_selected = (t_pathClick.id == t_id);
-            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), t_selected, t_pathClick, t_path, t_id);
+            if (t_selectedDirectoryIds.contains(t_id))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::selected_color);
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, Window::text_color);
+            }
+
+            add_selectable_field(pre.append(wstring_conv(t_path)).c_str(), &focus, t_pathClick, t_path, t_id, t_selectedDirectoryIds);
+
+            ImGui::PopStyleColor(1);
         }
     }
 
