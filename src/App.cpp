@@ -19,10 +19,10 @@
 #include <imgui_internal.h>
 #include "App.h"
 #include "Window.h"
-#include "FileSystem.h"
 #include "Renderer.h"
 #include "IcAssert.h"
 #include "vendor/imgui/imgui_impl_sdl2.h"
+#include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -84,6 +84,9 @@ void ic::App::Init()
 
     IC_ASSERT(!root_paths.empty(), "[App::Init()] Invalid number of root paths.")
 
+    m_entriesLeft = fs::read_from(m_currentPathLeft);
+    m_entriesRight = fs::read_from(m_currentPathRight);
+
     IC_LOG_DEBUG("[App::Init()] The app was successfully initialized.");
 }
 
@@ -99,6 +102,61 @@ void ic::App::Render()
     RenderLeftInfo();
     RenderRightInfo();
     RenderMainMenuButtons();
+
+    // todo: tmp code; example dialog
+    if(m_render_dialog)
+    {
+        ImGui::OpenPopup("Create Directory");
+
+        if(ImGui::BeginPopupModal("Create Directory", &m_render_dialog, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::InputText("##newPath", &m_newPathStr);
+
+            if(ImGui::Button("Close"))
+            {
+                m_render_dialog = false;
+
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Create"))
+            {
+                std::filesystem::path p;
+                if (m_currentSide == Side::LEFT)
+                {
+                    p = m_currentPathLeft / m_newPathStr;
+                }
+                else
+                {
+                    p = m_currentPathRight / m_newPathStr;
+                }
+
+                if (!std::filesystem::exists(p))
+                {
+                    if (std::filesystem::create_directory(p))
+                    {
+                        IC_LOG_DEBUG("[App::Render()] Directory {} created successfully.", p.filename().string());
+                        m_entriesLeft = fs::read_from(m_currentPathLeft);
+                        m_entriesRight = fs::read_from(m_currentPathRight);
+                    }
+                    else
+                    {
+                        IC_LOG_DEBUG("[App::Render()] Failed to create directory.");
+                    }
+                }
+                else
+                {
+                    IC_LOG_DEBUG("[App::Render()] Directory already exists.");
+                }
+
+                m_render_dialog = false;
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
 }
 
 void ic::App::RenderMainMenu()
@@ -115,7 +173,7 @@ void ic::App::RenderMainMenu()
         {
             if (ImGui::MenuItem("File listing", "CTRL+G"))
             {
-                Log::IC_LOG_INFO("Left - File listing");
+                IC_LOG_INFO("[App::RenderMainMenu()] Left - File listing");
             }
             if (ImGui::MenuItem("Quick view", "CTRL+Q")) {}
             if (ImGui::MenuItem("Info", "CTRL+I")) {}
@@ -154,7 +212,7 @@ void ic::App::RenderMainMenu()
         {
             if (ImGui::MenuItem("File listing", "CTRL+G"))
             {
-                Log::IC_LOG_INFO("Right - File listing");
+                IC_LOG_INFO("[App::RenderMainMenu()] Right - File listing");
             }
             if (ImGui::MenuItem("Quick view", "CTRL+Q")) {}
             if (ImGui::MenuItem("Info", "CTRL+I")) {}
@@ -174,8 +232,6 @@ void ic::App::RenderMainMenu()
 
 void ic::App::RenderLeft()
 {
-    static auto entries{ fs::read_from(m_currentPathLeft) };
-
     ImGui::SetNextWindowPos({ 0.0f, ImGui::GetFrameHeight() });
     ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
@@ -205,10 +261,11 @@ void ic::App::RenderLeft()
     ImGui::NewLine();
 
     renderer::render_view(
-        ic::Side::LEFT,
+        Side::LEFT,
+        m_currentSide == Side::LEFT,
         m_currentPathLeft,
         m_lastClickedLeft,
-        entries,
+        m_entriesLeft,
         m_selectedFileIdsLeft,
         m_selectedDirectoryIdsLeft
     );
@@ -225,7 +282,7 @@ void ic::App::RenderLeft()
             m_selectedFileIdsLeft.clear();
             m_selectedDirectoryIdsLeft.clear();
 
-            entries = fs::read_from(m_currentPathLeft);
+            m_entriesLeft = fs::read_from(m_currentPathLeft);
         }
 
         // reset clicked
@@ -241,7 +298,12 @@ void ic::App::RenderLeft()
         m_selectedFileIdsLeft.clear();
         m_selectedDirectoryIdsLeft.clear();
 
-        entries = fs::read_from(m_currentPathLeft);
+        m_entriesLeft = fs::read_from(m_currentPathLeft);
+    }
+
+    if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused())
+    {
+        m_currentSide = Side::LEFT;
     }
 
     ImGui::End();
@@ -249,8 +311,6 @@ void ic::App::RenderLeft()
 
 void ic::App::RenderRight()
 {
-    static auto entries{ fs::read_from(m_currentPathRight) };
-
     ImGui::SetNextWindowPos({ static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() });
     ImGui::SetNextWindowSize({ static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f) });
 
@@ -280,10 +340,11 @@ void ic::App::RenderRight()
     ImGui::NewLine();
 
     renderer::render_view(
-        ic::Side::RIGHT,
+        Side::RIGHT,
+        m_currentSide == Side::RIGHT,
         m_currentPathRight,
         m_lastClickedRight,
-        entries,
+        m_entriesRight,
         m_selectedFileIdsRight,
         m_selectedDirectoryIdsRight
     );
@@ -300,7 +361,7 @@ void ic::App::RenderRight()
             m_selectedFileIdsRight.clear();
             m_selectedDirectoryIdsRight.clear();
 
-            entries = fs::read_from(m_currentPathRight);
+            m_entriesRight = fs::read_from(m_currentPathRight);
         }
 
         // reset clicked
@@ -316,7 +377,12 @@ void ic::App::RenderRight()
         m_selectedFileIdsRight.clear();
         m_selectedDirectoryIdsRight.clear();
 
-        entries = fs::read_from(m_currentPathRight);
+        m_entriesRight = fs::read_from(m_currentPathRight);
+    }
+
+    if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused())
+    {
+        m_currentSide = Side::RIGHT;
     }
 
     ImGui::End();
@@ -391,6 +457,7 @@ void ic::App::RenderMainMenuButtons()
 
     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
+
     ImGui::SameLine();
     if (ImGui::Button("Menu")) {}
     ImGui::SameLine();
@@ -402,12 +469,38 @@ void ic::App::RenderMainMenuButtons()
     ImGui::SameLine();
     if (ImGui::Button("Move")) {}
     ImGui::SameLine();
-    if (ImGui::Button("MkDir")) {}
+
+    ImGui::PopItemFlag();
+    ImGui::PopStyleVar();
+
+
+
+    if (m_currentSide == Side::NONE)
+    {
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
+    }
+    if (ImGui::Button("MkDir") && m_currentSide != Side::NONE)
+    {
+        m_render_dialog = true;
+    }
     ImGui::SameLine();
+    if (m_currentSide == Side::NONE)
+    {
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
+    }
+
+
+
+    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, Window::alpha * 0.5f);
+
     if (ImGui::Button("Delete")) {}
     ImGui::SameLine();
     if (ImGui::Button("PullDn")) {}
     ImGui::SameLine();
+
     ImGui::PopItemFlag();
     ImGui::PopStyleVar();
 

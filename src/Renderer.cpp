@@ -36,6 +36,7 @@
 
 void ic::renderer::render_view(
     Side t_side,
+    bool t_active,
     const std::filesystem::path& t_from,
     PathClick& t_pathClick,
     const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
@@ -45,7 +46,7 @@ void ic::renderer::render_view(
 {
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
-        render_header();
+        render_header(t_active);
         render_first_row(t_from, t_pathClick);
 
         int id{ 1 };
@@ -102,11 +103,22 @@ void ic::renderer::render_view(
     }
 }
 
-void ic::renderer::render_header()
+void ic::renderer::render_header(const bool t_active)
 {
     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
     ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (t_active)
+    {
+        style.Colors[ImGuiCol_TableHeaderBg] = Window::table_header_bg_active_color;
+    }
+    else
+    {
+        style.Colors[ImGuiCol_TableHeaderBg] = Window::table_header_bg_color;
+    }
+
     ImGui::TableHeadersRow();
 }
 

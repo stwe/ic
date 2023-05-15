@@ -48,6 +48,8 @@ namespace ic
         inline static ImVec4 hidden_color{ ImVec4(1.0f, 1.0f, 1.0f, 0.7f) };
         inline static ImVec4 symlink_color{ ImVec4(0.922f, 0.475f, 0.043f, 1.0f) };
         inline static ImVec4 selected_color{ ImVec4(1.0f, 1.0f, 0.0f, 1.0f) };
+        inline static ImVec4 table_header_bg_color{ ImVec4(0.2f, 0.2f, 0.2f, 1.0f) };
+        inline static ImVec4 table_header_bg_active_color{ ImVec4(0.4f, 0.4f, 0.4f, 1.0f) };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

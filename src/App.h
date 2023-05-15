@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include <filesystem>
+#include "FileSystem.h"
 #include "vendor/ini/ini.h"
 
 namespace ic
@@ -35,7 +35,7 @@ namespace ic
 
     enum class Side
     {
-        LEFT, RIGHT
+        LEFT, RIGHT, NONE
     };
 
     class App
@@ -87,6 +87,14 @@ namespace ic
 
         std::set<int> m_selectedDirectoryIdsLeft;
         std::set<int> m_selectedDirectoryIdsRight;
+
+        inline static bool m_render_dialog{ false }; // todo: tmp
+
+        Side m_currentSide{ Side::NONE };
+        std::string m_newPathStr; // todo: tmp
+
+        std::set<std::filesystem::path, decltype(fs::path_comparator)*> m_entriesLeft;
+        std::set<std::filesystem::path, decltype(fs::path_comparator)*> m_entriesRight;
 
         //-------------------------------------------------
         // Init

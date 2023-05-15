@@ -133,9 +133,12 @@ void ic::Window::ConfigTheme()
     const auto hidden{ App::INI.GetVector<float>("theme", "hidden_color") };
     const auto symlink{ App::INI.GetVector<float>("theme", "symlink_color") };
     const auto selected{ App::INI.GetVector<float>("theme", "selected_color") };
+    const auto tableHeaderBg{ App::INI.GetVector<float>("theme", "table_header_bg_color") };
+    const auto tableHeaderActiveBg{ App::INI.GetVector<float>("theme", "table_header_bg_active_color") };
 
     const std::vector<std::vector<float>> colors{
-        windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn, clear, symlink, selected
+        windowBg, text, titleBg, titleBgActive, border, headerHovered, menuBarBg, warn, clear, symlink, selected,
+        tableHeaderBg, tableHeaderActiveBg
     };
 
     for (const auto& col : colors)
@@ -164,6 +167,8 @@ void ic::Window::ConfigTheme()
     hidden_color = ImVec4(hidden.at(0), hidden.at(1), hidden.at(2), hidden.at(3));
     symlink_color = ImVec4(symlink.at(0), symlink.at(1), symlink.at(2), 1.0f);
     selected_color = ImVec4(selected.at(0), selected.at(1), selected.at(2), 1.0f);
+    table_header_bg_color = ImVec4(tableHeaderBg.at(0), tableHeaderBg.at(1), tableHeaderBg.at(2), 1.0f);
+    table_header_bg_active_color = ImVec4(tableHeaderActiveBg.at(0), tableHeaderActiveBg.at(1), tableHeaderActiveBg.at(2), 1.0f);
 }
 
 void ic::Window::InitImGui()

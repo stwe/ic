@@ -33,6 +33,7 @@ namespace ic::renderer
 
     void render_view(
         Side t_side,
+        bool t_active,
         const std::filesystem::path& t_from,
         PathClick& t_pathClick,
         const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
@@ -40,7 +41,7 @@ namespace ic::renderer
         std::set<int>& t_selectedDirectoryIds
     );
 
-    void render_header();
+    void render_header(bool t_active);
     void render_first_row(const std::filesystem::path& t_path, PathClick& t_pathClick);
     void render_file(const std::filesystem::path& t_path, bool t_focus, PathClick& t_pathClick, int t_id, std::set<int>& t_selectedFileIds);
     void render_directory(const std::filesystem::path& t_path, bool t_focus, PathClick& t_pathClick, int t_id, std::set<int>& t_selectedDirectoryIds);
