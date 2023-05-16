@@ -36,7 +36,7 @@ namespace ic::renderer
         bool t_active,
         const std::filesystem::path& t_from,
         PathClick& t_pathClick,
-        const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
+        std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
         std::set<int>& t_selectedFileIds,
         std::set<int>& t_selectedDirectoryIds
     );

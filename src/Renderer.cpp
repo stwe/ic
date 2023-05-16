@@ -39,11 +39,24 @@ void ic::renderer::render_view(
     bool t_active,
     const std::filesystem::path& t_from,
     PathClick& t_pathClick,
-    const std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
+    std::set<std::filesystem::path, decltype(fs::path_comparator)*>& t_entries,
     std::set<int>& t_selectedFileIds,
     std::set<int>& t_selectedDirectoryIds
 )
 {
+    // todo: Renderer Klasse mit den Entries. Filesystem informiert Renderer über Änderungen.
+
+    // todo: start workaround
+    for (const auto& entry : t_entries)
+    {
+        if (!std::filesystem::is_regular_file(entry) && !std::filesystem::is_directory(entry))
+        {
+            t_entries = fs::read_from(entry.parent_path());
+            break;
+        }
+    }
+    // todo: end workaround
+
     if (ImGui::BeginTable("##filesTable", 3, ImGuiTableFlags_BordersV))
     {
         render_header(t_active);
@@ -62,7 +75,7 @@ void ic::renderer::render_view(
 
                 if (column == 0)
                 {
-                    if (is_regular_file(entry))
+                    if (std::filesystem::is_regular_file(entry))
                     {
                         render_file(entry, false, t_pathClick, id, t_selectedFileIds);
                     }
@@ -74,7 +87,7 @@ void ic::renderer::render_view(
 
                 if (column == 1)
                 {
-                    if (is_regular_file(entry))
+                    if (std::filesystem::is_regular_file(entry))
                     {
                         ImGui::Text("%s", get_human_readable_size(std::filesystem::file_size(entry)).c_str());
                     }
@@ -86,8 +99,11 @@ void ic::renderer::render_view(
 
                 if (column == 2)
                 {
-                    const auto fileTime{ std::filesystem::last_write_time(entry) };
-                    ImGui::Text("%s", last_write_time_to_str(fileTime).c_str());
+                    if (std::filesystem::is_regular_file(entry) || std::filesystem::is_directory(entry))
+                    {
+                        const auto fileTime{ std::filesystem::last_write_time(entry) };
+                        ImGui::Text("%s", last_write_time_to_str(fileTime).c_str());
+                    }
                 }
             }
 
