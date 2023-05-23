@@ -16,40 +16,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "Log.h"
-#include "IcException.h"
-#include "application/Application.h"
+#pragma once
 
-//-------------------------------------------------
-// Main
-//-------------------------------------------------
+#include <set>
+#include <filesystem>
 
-int main()
+namespace ic::data
 {
-    ic::Log::Init();
-
-    ic::Log::IC_LOG_DEBUG("[main()] Starting main.");
-    ic::Log::IC_LOG_DEBUG("[main()] Logger was initialized.");
-
-    try
+    template <typename Compare>
+    struct Entries
     {
-        ic::application::Application app;
-        app.Run();
-
-        return EXIT_SUCCESS;
-    }
-    catch (const ic::IcException& e)
-    {
-        ic::Log::IC_LOG_ERROR("IcException {}", e.what());
-    }
-    catch (const std::exception& e)
-    {
-        ic::Log::IC_LOG_ERROR("Standard Exception: {}", e.what());
-    }
-    catch (...)
-    {
-        ic::Log::IC_LOG_ERROR("Unknown Exception. No details available.");
-    }
-
-    return EXIT_FAILURE;
+        std::set<std::filesystem::path, Compare> filesAndDirs;
+    };
 }

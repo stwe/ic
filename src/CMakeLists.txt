@@ -12,6 +12,7 @@ file(GLOB_RECURSE SRC_FILES
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
+find_package(eventpp CONFIG REQUIRED)
 
 message("Building with CMake version: ${CMAKE_VERSION}")
 
@@ -34,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
         )
+target_link_libraries(${PROJECT_NAME} PRIVATE eventpp::eventpp)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

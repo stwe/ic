@@ -4,13 +4,12 @@ Playing around with std::filesystem and ImGui for education purposes. A simple f
 
 **!Do not use this program in your productive environment!**
 
-<img src="https://github.com/stwe/ic/blob/main/doc/2023-05-12.png" width="500" height="400" alt="" />
-
 ## Requirements
 
 * [SDL2](https://www.libsdl.org/)
 * [spdlog](https://github.com/gabime/spdlog)
 * [imgui](https://github.com/ocornut/imgui)
+* [eventpp](https://github.com/wqking/eventpp)
 * C++ 20 Compiler (Gcc or MSVC)
 
 ## Platforms
