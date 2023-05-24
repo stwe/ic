@@ -21,6 +21,7 @@
 #include "IcAssert.h"
 #include "application/Application.h"
 #include "widget/ViewWidget.h"
+#include "widget/InfoWidget.h"
 #include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
@@ -35,6 +36,7 @@ ic::data::View::View(ViewType t_viewType)
     IC_LOG_DEBUG("[View::View()] Create View. The type is {}.", std::string(magic_enum::enum_name(m_viewType)));
 
     m_viewWidget = std::make_unique<widget::ViewWidget>(this, std::string(magic_enum::enum_name(m_viewType)));
+    m_infoWidget = std::make_unique<widget::InfoWidget>(this, std::string(magic_enum::enum_name(m_viewType)));
 
     AppendListeners();
 }
@@ -58,6 +60,16 @@ void ic::data::View::SetSize(const float t_x, const float t_y) const
     m_viewWidget->SetSize(t_x, t_y);
 }
 
+void ic::data::View::SetInfoPosition(const float t_x, const float t_y) const
+{
+    m_infoWidget->SetPosition(t_x, t_y);
+}
+
+void ic::data::View::SetInfoSize(const float t_x, const float t_y) const
+{
+    m_infoWidget->SetSize(t_x, t_y);
+}
+
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
@@ -73,6 +85,7 @@ void ic::data::View::Update()
 void ic::data::View::Render() const
 {
     m_viewWidget->Render();
+    m_infoWidget->Render();
 }
 
 //-------------------------------------------------
@@ -88,6 +101,7 @@ void ic::data::View::AppendListeners()
                 if (!t_event.path.empty())
                 {
                     currentPath = t_event.path.parent_path();
+                    currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR.");
                 }
@@ -101,8 +115,21 @@ void ic::data::View::AppendListeners()
                 if (!t_event.path.empty())
                 {
                     currentPath = t_event.path;
+                    currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR.");
+                }
+            })
+    );
+
+    application::Application::event_dispatcher.appendListener(
+        event::IcEventType::SELECT_PATH,
+        eventpp::argumentAdapter<void(const event::SelectPathEvent&)>(
+            [this](const event::SelectPathEvent& t_event) {
+                if (!t_event.path.empty())
+                {
+                    currentSelectedPath = t_event.path;
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH.");
                 }
             })
     );

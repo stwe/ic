@@ -71,7 +71,7 @@ void ic::widget::ViewWidget::Render() const
     ImGui::SetNextWindowSize({ m_sizeX, m_sizeY });
 
     ImGui::Begin(
-        (std::string("##").append(m_name)).c_str(),
+        (std::string("##View").append(m_name)).c_str(),
         nullptr,
         ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoTitleBar |
@@ -215,11 +215,21 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
         }
 
-        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick) && ImGui::IsMouseDoubleClicked(0))
+        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            application::Application::event_dispatcher.dispatch(event::IcEventType::IN_DIR, event::InDirEvent(t_path));
-            ImGui::PopStyleColor(1);
-            return true;
+            // double click
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                application::Application::event_dispatcher.dispatch(event::IcEventType::IN_DIR, event::InDirEvent(t_path));
+                ImGui::PopStyleColor(1);
+                return true;
+            }
+            else // single click
+            {
+                application::Application::event_dispatcher.dispatch(event::IcEventType::SELECT_PATH, event::SelectPathEvent(t_path));
+                ImGui::PopStyleColor(1);
+                return false;
+            }
         }
 
         ImGui::PopStyleColor(1);
@@ -259,7 +269,11 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
         }
 
-        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
+        if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false))
+        {
+            application::Application::event_dispatcher.dispatch(event::IcEventType::SELECT_PATH, event::SelectPathEvent(t_path));
+        }
+
         ImGui::PopStyleColor(1);
     }
     else

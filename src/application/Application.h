@@ -76,7 +76,7 @@ namespace ic::application
         inline static std::set<std::filesystem::path> root_paths;
 
         std::unique_ptr<Window> m_window;
-        std::unique_ptr<data::View> m_left;
+        std::unique_ptr<data::View> m_leftView;
 
         //-------------------------------------------------
         // Logic

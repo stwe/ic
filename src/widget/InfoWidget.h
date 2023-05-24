@@ -18,33 +18,59 @@
 
 #pragma once
 
+#include <string>
+
+namespace ic::data
+{
+    class View;
+}
+
 namespace ic::widget
 {
-    class MainMenuWidget
+    class InfoWidget
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MainMenuWidget() = delete;
+        InfoWidget() = delete;
 
-        MainMenuWidget(const MainMenuWidget& t_other) = delete;
-        MainMenuWidget(MainMenuWidget&& t_other) noexcept = delete;
-        MainMenuWidget& operator=(const MainMenuWidget& t_other) = delete;
-        MainMenuWidget& operator=(MainMenuWidget&& t_other) noexcept = delete;
+        explicit InfoWidget(data::View* t_parentView, std::string t_name);
 
-        ~MainMenuWidget() noexcept = delete;
+        InfoWidget(const InfoWidget& t_other) = delete;
+        InfoWidget(InfoWidget&& t_other) noexcept = delete;
+        InfoWidget& operator=(const InfoWidget& t_other) = delete;
+        InfoWidget& operator=(InfoWidget&& t_other) noexcept = delete;
+
+        ~InfoWidget() noexcept;
+
+        //-------------------------------------------------
+        // Setter
+        //-------------------------------------------------
+
+        void SetPosition(float t_x, float t_y);
+        void SetSize(float t_x, float t_y);
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        static void Render();
+        void Render() const;
 
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
+        data::View* m_parentView{ nullptr };
+        std::string m_name;
+
+        float m_posX{ -1.0f };
+        float m_posY{ -1.0f };
+        float m_sizeX{ -1.0f };
+        float m_sizeY{ -1.0f };
     };
 }

@@ -33,7 +33,8 @@ namespace ic::event
 
         // events
         UP_DIR,
-        IN_DIR
+        IN_DIR,
+        SELECT_PATH
     };
 
     //-------------------------------------------------
@@ -71,6 +72,17 @@ namespace ic::event
             : path{ std::move(t_path) }
         {
             type = IcEventType::IN_DIR;
+        }
+    };
+
+    struct SelectPathEvent: IcEvent
+    {
+        std::filesystem::path path;
+
+        explicit SelectPathEvent(std::filesystem::path t_path)
+            : path{ std::move(t_path) }
+        {
+            type = IcEventType::SELECT_PATH;
         }
     };
 }

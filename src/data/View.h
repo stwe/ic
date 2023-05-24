@@ -25,6 +25,7 @@
 namespace ic::widget
 {
     class ViewWidget;
+    class InfoWidget;
 }
 
 namespace ic::data
@@ -51,6 +52,11 @@ namespace ic::data
          */
         std::filesystem::path currentPath{ std::filesystem::current_path() };
 
+        /**
+         * The file or directory currently selected with a single mouse click.
+         */
+        std::filesystem::path currentSelectedPath;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -72,6 +78,8 @@ namespace ic::data
 
         void SetPosition(float t_x, float t_y) const;
         void SetSize(float t_x, float t_y) const;
+        void SetInfoPosition(float t_x, float t_y) const;
+        void SetInfoSize(float t_x, float t_y) const;
 
         //-------------------------------------------------
         // Logic
@@ -96,6 +104,11 @@ namespace ic::data
          * To render the entries.
          */
         std::unique_ptr<widget::ViewWidget> m_viewWidget;
+
+        /**
+         * To render information about the entries.
+         */
+        std::unique_ptr<widget::InfoWidget> m_infoWidget;
 
         //-------------------------------------------------
         // Listeners
