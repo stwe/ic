@@ -103,6 +103,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path.parent_path();
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
@@ -117,6 +118,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
@@ -129,6 +131,7 @@ void ic::data::View::AppendListeners()
                 if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
                     currentSelectedPath = t_event.path;
+                    application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })

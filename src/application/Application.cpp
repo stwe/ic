@@ -31,6 +31,8 @@
 ic::application::Application::Application()
 {
     IC_LOG_DEBUG("[Application::Application()] Create Application.");
+
+    current_view_type = data::ViewType::NONE;
 }
 
 ic::application::Application::~Application() noexcept

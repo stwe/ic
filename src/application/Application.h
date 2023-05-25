@@ -22,11 +22,6 @@
 #include "event/Event.h"
 #include "vendor/ini/ini.h"
 
-namespace ic::data
-{
-    class View;
-}
-
 namespace ic::application
 {
     class Window;
@@ -40,6 +35,8 @@ namespace ic::application
 
         inline static const inih::INIReader INI{ "./config.ini" };
         inline static eventpp::EventDispatcher<event::IcEventType, void(const event::IcEvent&)> event_dispatcher;
+
+        inline static data::ViewType current_view_type{ data::ViewType::NONE };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
