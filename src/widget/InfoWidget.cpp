@@ -20,19 +20,18 @@
 #include "InfoWidget.h"
 #include "IcAssert.h"
 #include "data/View.h"
+#include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-ic::widget::InfoWidget::InfoWidget(ic::data::View* t_parentView, std::string t_name)
+ic::widget::InfoWidget::InfoWidget(ic::data::View* t_parentView)
     : m_parentView{ t_parentView }
-    , m_name{ std::move(t_name) }
 {
     IC_ASSERT(m_parentView, "[InfoWidget::InfoWidget()] Null pointer.")
-    IC_ASSERT(!m_name.empty(), "[InfoWidget::InfoWidget()] Invalid name.")
 
-    IC_LOG_DEBUG("[InfoWidget::InfoWidget()] Create InfoWidget {}.", m_name);
+    IC_LOG_DEBUG("[InfoWidget::InfoWidget()] Create InfoWidget.");
 }
 
 ic::widget::InfoWidget::~InfoWidget() noexcept
@@ -68,8 +67,10 @@ void ic::widget::InfoWidget::Render() const
     ImGui::SetNextWindowPos({ m_posX, m_posY });
     ImGui::SetNextWindowSize({ m_sizeX, m_sizeY });
 
+    const auto name{ std::string(magic_enum::enum_name(m_parentView->viewType)) };
+
     ImGui::Begin(
-        (std::string("##Info").append(m_name)).c_str(),
+        (std::string("##Info").append(name)).c_str(),
         nullptr,
         ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoTitleBar |

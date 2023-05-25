@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <string>
-
 namespace ic::data
 {
     class View;
@@ -36,7 +34,7 @@ namespace ic::widget
 
         InfoWidget() = delete;
 
-        explicit InfoWidget(data::View* t_parentView, std::string t_name);
+        explicit InfoWidget(data::View* t_parentView);
 
         InfoWidget(const InfoWidget& t_other) = delete;
         InfoWidget(InfoWidget&& t_other) noexcept = delete;
@@ -66,7 +64,6 @@ namespace ic::widget
         //-------------------------------------------------
 
         data::View* m_parentView{ nullptr };
-        std::string m_name;
 
         float m_posX{ -1.0f };
         float m_posY{ -1.0f };

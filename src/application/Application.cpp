@@ -76,6 +76,7 @@ void ic::application::Application::Init()
     );
 
     m_leftView = std::make_unique<data::View>(data::ViewType::LEFT);
+    m_rightView = std::make_unique<data::View>(data::ViewType::RIGHT);
 
     IC_LOG_DEBUG("[Application::Init()] The application was successfully initialized.");
 }
@@ -102,6 +103,7 @@ void ic::application::Application::HandleSdlEvents(bool& t_running)
 void ic::application::Application::Update()
 {
     m_leftView->Update();
+    m_rightView->Update();
 }
 
 void ic::application::Application::Render() const
@@ -113,6 +115,12 @@ void ic::application::Application::Render() const
     m_leftView->SetInfoPosition(0.0f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f));
     m_leftView->SetInfoSize(static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 2.0f);
     m_leftView->Render();
+
+    m_rightView->SetPosition(static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight());
+    m_rightView->SetSize(static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f));
+    m_rightView->SetInfoPosition(static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 4.0f));
+    m_rightView->SetInfoSize(static_cast<float>(m_window->width) * 0.5f, ImGui::GetFrameHeight() * 2.0f);
+    m_rightView->Render();
 
     widget::BottomMenuWidget::SetPosition(0.0f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 2.0f));
     widget::BottomMenuWidget::SetSize(static_cast<float>(m_window->width), ImGui::GetFrameHeight() * 2.0f);

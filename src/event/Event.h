@@ -19,6 +19,7 @@
 #pragma once
 
 #include <filesystem>
+#include "data/View.h"
 
 namespace ic::event
 {
@@ -43,10 +44,18 @@ namespace ic::event
 
     struct IcEvent
     {
-        IcEvent() = default;
-        virtual ~IcEvent() = default;
+        std::filesystem::path path;
+        data::ViewType viewType{ data::ViewType::NONE };
+        IcEventType eventType{ IcEventType::NONE };
 
-        IcEventType type{ IcEventType::NONE };
+        IcEvent() = default;
+
+        IcEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : path{ std::move(t_path) }
+            , viewType{ t_viewType }
+        {}
+
+        virtual ~IcEvent() noexcept = default;
     };
 
     //-------------------------------------------------
@@ -55,34 +64,28 @@ namespace ic::event
 
     struct UpDirEvent: IcEvent
     {
-        std::filesystem::path path;
-
-        explicit UpDirEvent(std::filesystem::path t_path)
-            : path{ std::move(t_path) }
+        UpDirEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : IcEvent(std::move(t_path), t_viewType)
         {
-            type = IcEventType::UP_DIR;
+            eventType = IcEventType::UP_DIR;
         }
     };
 
     struct InDirEvent: IcEvent
     {
-        std::filesystem::path path;
-
-        explicit InDirEvent(std::filesystem::path t_path)
-            : path{ std::move(t_path) }
+        InDirEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : IcEvent(std::move(t_path), t_viewType)
         {
-            type = IcEventType::IN_DIR;
+            eventType = IcEventType::IN_DIR;
         }
     };
 
     struct SelectPathEvent: IcEvent
     {
-        std::filesystem::path path;
-
-        explicit SelectPathEvent(std::filesystem::path t_path)
-            : path{ std::move(t_path) }
+        SelectPathEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : IcEvent(std::move(t_path), t_viewType)
         {
-            type = IcEventType::SELECT_PATH;
+            eventType = IcEventType::SELECT_PATH;
         }
     };
 }

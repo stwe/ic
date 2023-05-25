@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <string>
 #include <filesystem>
 
 namespace ic::data
@@ -37,7 +36,7 @@ namespace ic::widget
 
         ViewWidget() = delete;
 
-        explicit ViewWidget(data::View* t_parentView, std::string t_name);
+        explicit ViewWidget(data::View* t_parentView);
 
         ViewWidget(const ViewWidget& t_other) = delete;
         ViewWidget(ViewWidget&& t_other) noexcept = delete;
@@ -67,7 +66,6 @@ namespace ic::widget
         //-------------------------------------------------
 
         data::View* m_parentView{ nullptr };
-        std::string m_name;
 
         float m_posX{ -1.0f };
         float m_posY{ -1.0f };
@@ -86,7 +84,7 @@ namespace ic::widget
         // Render
         //-------------------------------------------------
 
-        [[nodiscard]] static bool RenderDirectory(const std::filesystem::path& t_path);
-        static void RenderFile(const std::filesystem::path& t_path);
+        [[nodiscard]] bool RenderDirectory(const std::filesystem::path& t_path) const;
+        void RenderFile(const std::filesystem::path& t_path) const;
     };
 }

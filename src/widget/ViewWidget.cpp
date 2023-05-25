@@ -22,19 +22,18 @@
 #include "application/Application.h"
 #include "application/Util.h"
 #include "data/View.h"
+#include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-ic::widget::ViewWidget::ViewWidget(data::View* t_parentView, std::string t_name)
+ic::widget::ViewWidget::ViewWidget(data::View* t_parentView)
     : m_parentView{ t_parentView }
-    , m_name{ std::move(t_name) }
 {
     IC_ASSERT(m_parentView, "[ViewWidget::ViewWidget()] Null pointer.")
-    IC_ASSERT(!m_name.empty(), "[ViewWidget::ViewWidget()] Invalid name.")
 
-    IC_LOG_DEBUG("[ViewWidget::ViewWidget()] Create ViewWidget {}.", m_name);
+    IC_LOG_DEBUG("[ViewWidget::ViewWidget()] Create ViewWidget.");
 }
 
 ic::widget::ViewWidget::~ViewWidget() noexcept
@@ -70,8 +69,10 @@ void ic::widget::ViewWidget::Render() const
     ImGui::SetNextWindowPos({ m_posX, m_posY });
     ImGui::SetNextWindowSize({ m_sizeX, m_sizeY });
 
+    const auto name{ std::string(magic_enum::enum_name(m_parentView->viewType)) };
+
     ImGui::Begin(
-        (std::string("##View").append(m_name)).c_str(),
+        (std::string("##View").append(name)).c_str(),
         nullptr,
         ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoTitleBar |
@@ -81,7 +82,7 @@ void ic::widget::ViewWidget::Render() const
 
     ImGui::NewLine();
 
-    if (ImGui::BeginTable((std::string("##").append(m_name).append("filesTable")).c_str(), 3, ImGuiTableFlags_BordersV))
+    if (ImGui::BeginTable((std::string("##").append(name).append("filesTable")).c_str(), 3, ImGuiTableFlags_BordersV))
     {
         RenderHeader();
         RenderFirstRow();
@@ -121,7 +122,10 @@ void ic::widget::ViewWidget::RenderFirstRow() const
                 ImGui::PushID(0);
                 if (ImGui::Selectable("/..", false, ImGuiSelectableFlags_AllowDoubleClick) && ImGui::IsMouseDoubleClicked(0))
                 {
-                    application::Application::event_dispatcher.dispatch(event::IcEventType::UP_DIR, event::UpDirEvent(m_parentView->currentPath));
+                    application::Application::event_dispatcher.dispatch(
+                        event::IcEventType::UP_DIR,
+                        event::UpDirEvent(m_parentView->currentPath, m_parentView->viewType)
+                    );
                 }
                 ImGui::PopID();
             }
@@ -195,7 +199,7 @@ void ic::widget::ViewWidget::RenderRows() const
 // Render
 //-------------------------------------------------
 
-bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path)
+bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path) const
 {
     std::string pre = "/";
 
@@ -220,13 +224,19 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
             // double click
             if (ImGui::IsMouseDoubleClicked(0))
             {
-                application::Application::event_dispatcher.dispatch(event::IcEventType::IN_DIR, event::InDirEvent(t_path));
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::IN_DIR,
+                    event::InDirEvent(t_path, m_parentView->viewType)
+                );
                 ImGui::PopStyleColor(1);
                 return true;
             }
             else // single click
             {
-                application::Application::event_dispatcher.dispatch(event::IcEventType::SELECT_PATH, event::SelectPathEvent(t_path));
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::SELECT_PATH,
+                    event::SelectPathEvent(t_path, m_parentView->viewType)
+                );
                 ImGui::PopStyleColor(1);
                 return false;
             }
@@ -250,7 +260,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
     return false;
 }
 
-void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path)
+void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) const
 {
     std::string pre;
     if (access(t_path.string().c_str(), R_OK) == 0)
@@ -271,7 +281,10 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path)
 
         if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false))
         {
-            application::Application::event_dispatcher.dispatch(event::IcEventType::SELECT_PATH, event::SelectPathEvent(t_path));
+            application::Application::event_dispatcher.dispatch(
+                event::IcEventType::SELECT_PATH,
+                event::SelectPathEvent(t_path, m_parentView->viewType)
+            );
         }
 
         ImGui::PopStyleColor(1);

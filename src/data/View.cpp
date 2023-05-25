@@ -29,14 +29,14 @@
 //-------------------------------------------------
 
 ic::data::View::View(ViewType t_viewType)
-    : m_viewType{ t_viewType }
+    : viewType{ t_viewType }
 {
-    IC_ASSERT(m_viewType != ViewType::NONE, "[View::View()] Invalid view type.")
+    IC_ASSERT(viewType != ViewType::NONE, "[View::View()] Invalid view type.")
 
-    IC_LOG_DEBUG("[View::View()] Create View. The type is {}.", std::string(magic_enum::enum_name(m_viewType)));
+    IC_LOG_DEBUG("[View::View()] Create View. The type is {}.", std::string(magic_enum::enum_name(viewType)));
 
-    m_viewWidget = std::make_unique<widget::ViewWidget>(this, std::string(magic_enum::enum_name(m_viewType)));
-    m_infoWidget = std::make_unique<widget::InfoWidget>(this, std::string(magic_enum::enum_name(m_viewType)));
+    m_viewWidget = std::make_unique<widget::ViewWidget>(this);
+    m_infoWidget = std::make_unique<widget::InfoWidget>(this);
 
     AppendListeners();
 }
@@ -98,12 +98,12 @@ void ic::data::View::AppendListeners()
         event::IcEventType::UP_DIR,
         eventpp::argumentAdapter<void(const event::UpDirEvent&)>(
             [this](const event::UpDirEvent& t_event) {
-                if (!t_event.path.empty())
+                if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
                     currentPath = t_event.path.parent_path();
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
-                    IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR.");
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );
@@ -112,12 +112,12 @@ void ic::data::View::AppendListeners()
         event::IcEventType::IN_DIR,
         eventpp::argumentAdapter<void(const event::InDirEvent&)>(
             [this](const event::InDirEvent& t_event) {
-                if (!t_event.path.empty())
+                if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
-                    IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR.");
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );
@@ -126,10 +126,10 @@ void ic::data::View::AppendListeners()
         event::IcEventType::SELECT_PATH,
         eventpp::argumentAdapter<void(const event::SelectPathEvent&)>(
             [this](const event::SelectPathEvent& t_event) {
-                if (!t_event.path.empty())
+                if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
                     currentSelectedPath = t_event.path;
-                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH.");
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );

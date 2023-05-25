@@ -43,6 +43,11 @@ namespace ic::data
         //-------------------------------------------------
 
         /**
+         * The type of this View.
+         */
+        ViewType viewType{ ViewType::NONE };
+
+        /**
          * Files and directories relative to the currentPath.
          */
         Entries<PathComparator> entries;
@@ -94,11 +99,6 @@ namespace ic::data
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        /**
-         * The type of this View.
-         */
-        ViewType m_viewType{ ViewType::NONE };
 
         /**
          * To render the entries.
