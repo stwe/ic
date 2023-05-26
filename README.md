@@ -4,6 +4,8 @@ Playing around with std::filesystem and ImGui for education purposes. A simple f
 
 **!Do not use this program in your productive environment!**
 
+<img src="https://github.com/stwe/ic/blob/main/doc/2023-05-26.png" width="640" height="480" alt="" />
+
 ## Requirements
 
 * [SDL2](https://www.libsdl.org/)
