@@ -20,6 +20,7 @@
 #include "InfoWidget.h"
 #include "IcAssert.h"
 #include "data/View.h"
+#include "application/Util.h"
 #include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
@@ -61,7 +62,7 @@ void ic::widget::InfoWidget::SetSize(const float t_x, const float t_y)
 
 void ic::widget::InfoWidget::Render() const
 {
-    IC_ASSERT(m_posX >= 0 && m_posY >= 0, "[InfoWidget::Render()] Invalid window position.")
+    IC_ASSERT(m_posX >= 0 && m_posY > 0, "[InfoWidget::Render()] Invalid window position.")
     IC_ASSERT(m_sizeX > 0 && m_sizeY > 0, "[InfoWidget::Render()] Invalid window size.")
 
     ImGui::SetNextWindowPos({ m_posX, m_posY });
@@ -82,11 +83,33 @@ void ic::widget::InfoWidget::Render() const
     {
         if (std::filesystem::is_directory(m_parentView->currentSelectedPath))
         {
-            ImGui::TextUnformatted(std::string("/").append(m_parentView->currentSelectedPath.filename().string()).c_str());
+#if defined(_WIN64) && defined(_MSC_VER)
+            ImGui::TextUnformatted(std::string("/").append(application::Util::WstringConv(m_parentView->currentSelectedPath.filename().string())).c_str());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath)
+            {
+                ImGui::TextUnformatted(std::string("-> ").append(std::filesystem::read_symlink(m_parentView->currentSelectedPath).string()).c_str());
+            }
+            else
+            {
+                ImGui::TextUnformatted(std::string("/").append(m_parentView->currentSelectedPath.filename().string()).c_str());
+            }
+#endif
         }
-        else
+        else if (std::filesystem::is_regular_file(m_parentView->currentSelectedPath))
         {
-            ImGui::TextUnformatted(m_parentView->currentSelectedPath.filename().string().c_str());
+#if defined(_WIN64) && defined(_MSC_VER)
+            ImGui::TextUnformatted(application::Util::WstringConv(m_parentView->currentSelectedPath.filename().string()).c_str());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath)
+            {
+                ImGui::TextUnformatted(std::string("-> ").append(std::filesystem::read_symlink(m_parentView->currentSelectedPath).string()).c_str());
+            }
+            else
+            {
+                ImGui::TextUnformatted(m_parentView->currentSelectedPath.filename().string().c_str());
+            }
+#endif
         }
     }
 

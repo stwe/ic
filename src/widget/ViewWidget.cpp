@@ -80,6 +80,21 @@ void ic::widget::ViewWidget::Render() const
             ImGuiWindowFlags_NoSavedSettings
     );
 
+#if defined(_WIN64) && defined(_MSC_VER)
+    for (const auto& drive : application::Util::GetAvailableDriveLetters())
+    {
+        if (std::string label(1, drive); ImGui::Button(label.c_str()))
+        {
+            m_parentView->currentPath = std::filesystem::path(label.append(":\\"));
+            m_parentView->currentSelectedPath.clear();
+            m_parentView->entries.filesAndDirs.clear();
+            IC_LOG_DEBUG("[ViewWidget::Render()] Change to drive {}.", label);
+        }
+
+        ImGui::SameLine();
+    }
+#endif
+
     ImGui::NewLine();
 
     if (ImGui::BeginTable((std::string("##").append(name).append("filesTable")).c_str(), 3, ImGuiTableFlags_BordersV))
@@ -203,6 +218,61 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
 {
     std::string pre = "/";
 
+#if defined(_WIN64) && defined(_MSC_VER)
+    auto renderAsText{ false };
+
+    if (application::Util::IsAccessDenied(t_path.wstring()))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
+        renderAsText = true;
+    }
+    else if(application::Util::IsJunctionDirectory(t_path.wstring()))
+    {
+        pre = "~";
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
+        renderAsText = true;
+    }
+    else if (application::Util::IsHiddenDirectory(t_path.wstring()))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+    }
+
+    if (renderAsText)
+    {
+        ImGui::TextUnformatted(pre.append(application::Util::WstringConv(t_path)).c_str());
+    }
+    else
+    {
+        if (ImGui::Selectable(pre.append(application::Util::WstringConv(t_path)).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            // double click
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::IN_DIR,
+                    event::InDirEvent(t_path, m_parentView->viewType)
+                );
+                ImGui::PopStyleColor(1);
+                return true;
+            }
+            else // single click
+            {
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::SELECT_PATH,
+                    event::SelectPathEvent(t_path, m_parentView->viewType)
+                );
+                ImGui::PopStyleColor(1);
+                return false;
+            }
+        }
+    }
+
+    ImGui::PopStyleColor(1);
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     if (access(t_path.string().c_str(), R_OK) == 0)
     {
         if (std::filesystem::is_symlink(t_path))
@@ -256,12 +326,22 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
         ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
+#endif
 
     return false;
 }
 
 void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) const
 {
+#if defined(_WIN64) && defined(_MSC_VER)
+    if (ImGui::Selectable(application::Util::WstringConv(t_path).c_str(), false))
+    {
+        application::Application::event_dispatcher.dispatch(
+            event::IcEventType::SELECT_PATH,
+            event::SelectPathEvent(t_path, m_parentView->viewType)
+        );
+    }
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     std::string pre;
     if (access(t_path.string().c_str(), R_OK) == 0)
     {
@@ -295,4 +375,5 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
         ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
         ImGui::PopStyleColor(1);
     }
+#endif
 }

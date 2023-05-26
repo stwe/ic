@@ -18,6 +18,13 @@
 
 #include "Util.h"
 
+#if defined(_WIN64) && defined(_MSC_VER)
+    #define NOMINMAX
+    #include <codecvt>
+    #include <Aclapi.h>
+    #include <ranges>
+#endif
+
 //-------------------------------------------------
 // Utils
 //-------------------------------------------------
@@ -83,6 +90,57 @@ std::string ic::application::Util::WstringConv(const std::filesystem::path& t_pa
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.to_bytes(t_path.filename().wstring());
+}
+
+bool ic::application::Util::IsJunctionDirectory(const std::wstring_view& t_path)
+{
+    const auto attributes{ GetFileAttributesW(t_path.data()) };
+    if (attributes == INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    return (attributes & FILE_ATTRIBUTE_REPARSE_POINT) && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool ic::application::Util::IsHiddenDirectory(const std::wstring_view& t_path)
+{
+    const auto attributes{ GetFileAttributesW(t_path.data()) };
+    if (attributes == INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    return (attributes & FILE_ATTRIBUTE_HIDDEN) && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool ic::application::Util::IsAccessDenied(const std::wstring_view& t_path)
+{
+    PSECURITY_DESCRIPTOR sd{ nullptr };
+
+    const auto dwRes{ GetNamedSecurityInfoW(
+        t_path.data(),
+        SE_FILE_OBJECT,
+        DACL_SECURITY_INFORMATION,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        &sd
+    ) };
+
+    return dwRes != ERROR_SUCCESS;
+}
+
+std::vector<char> ic::application::Util::GetAvailableDriveLetters()
+{
+    const auto drives{ GetLogicalDrives() };
+
+    auto driveLetters = std::views::iota(0u, 26u)
+        | std::views::filter([drives](const int t_i) { return (drives & (1 << t_i)) != 0; })
+        | std::views::transform([](const int t_i) { return static_cast<char>('A' + t_i); });
+
+    return { driveLetters.begin(), driveLetters.end() };
 }
 #endif
 

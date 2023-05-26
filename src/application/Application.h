@@ -37,6 +37,7 @@ namespace ic::application
         inline static eventpp::EventDispatcher<event::IcEventType, void(const event::IcEvent&)> event_dispatcher;
 
         inline static data::ViewType current_view_type{ data::ViewType::NONE };
+        inline static std::set<std::filesystem::path> root_paths;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -69,8 +70,6 @@ namespace ic::application
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        inline static std::set<std::filesystem::path> root_paths;
 
         std::unique_ptr<Window> m_window;
 

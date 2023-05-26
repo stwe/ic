@@ -17,8 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Application.h"
+#include "IcAssert.h"
 #include "Window.h"
-#include "Log.h"
+#include "Util.h"
 #include "data/View.h"
 #include "widget/MainMenuWidget.h"
 #include "widget/BottomMenuWidget.h"
@@ -69,7 +70,20 @@ void ic::application::Application::Init()
 {
     IC_LOG_DEBUG("[Application::Init()] Initializing application ...");
 
+#if defined(_WIN64) && defined(_MSC_VER)
+    for (const auto drive : Util::GetAvailableDriveLetters())
+    {
+        std::string label(1, drive);
+        root_paths.emplace(label.append(":\\"));
+    }
+    IC_LOG_DEBUG("[Application::Init()] Found {} drive letters.", root_paths.size());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     root_paths.emplace("/");
+#else
+    #error Unsupported platform or compiler!
+#endif
+
+    IC_ASSERT(!root_paths.empty(), "[Application::Init()] Invalid number of root paths.")
 
     m_window = std::make_unique<Window>(
         "ic",

@@ -41,6 +41,10 @@ namespace ic::application
 
 #if defined(_WIN64) && defined(_MSC_VER)
         [[nodiscard]] static std::string WstringConv(const std::filesystem::path& t_path);
+        [[nodiscard]] static bool IsJunctionDirectory(const std::wstring_view& t_path);
+        [[nodiscard]] static bool IsHiddenDirectory(const std::wstring_view& t_path);
+        [[nodiscard]] static bool IsAccessDenied(const std::wstring_view& t_path);
+        [[nodiscard]] static std::vector<char> GetAvailableDriveLetters();
 #endif
 
         //-------------------------------------------------
@@ -54,5 +58,6 @@ namespace ic::application
     protected:
 
     private:
+
     };
 }

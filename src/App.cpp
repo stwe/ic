@@ -251,7 +251,7 @@ void ic::App::RenderLeft()
         {
             m_currentPathLeft = std::filesystem::path(label.append(":\\"));
             m_lastClickedLeft = PathClick{};
-            entries = fs::read_from(m_currentPathLeft);
+            //entries = fs::read_from(m_currentPathLeft);
         }
 
         ImGui::SameLine();
@@ -330,7 +330,7 @@ void ic::App::RenderRight()
         {
             m_currentPathRight = std::filesystem::path(label.append(":\\"));
             m_lastClickedRight = PathClick{};
-            entries = fs::read_from(m_currentPathRight);
+            //entries = fs::read_from(m_currentPathRight);
         }
 
         ImGui::SameLine();
