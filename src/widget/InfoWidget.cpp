@@ -86,7 +86,7 @@ void ic::widget::InfoWidget::Render() const
 #if defined(_WIN64) && defined(_MSC_VER)
             ImGui::TextUnformatted(std::string("/").append(application::Util::WstringConv(m_parentView->currentSelectedPath.filename().string())).c_str());
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath)
+            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath))
             {
                 ImGui::TextUnformatted(std::string("-> ").append(std::filesystem::read_symlink(m_parentView->currentSelectedPath).string()).c_str());
             }
@@ -101,7 +101,7 @@ void ic::widget::InfoWidget::Render() const
 #if defined(_WIN64) && defined(_MSC_VER)
             ImGui::TextUnformatted(application::Util::WstringConv(m_parentView->currentSelectedPath.filename().string()).c_str());
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath)
+            if (std::filesystem::is_symlink(m_parentView->currentSelectedPath))
             {
                 ImGui::TextUnformatted(std::string("-> ").append(std::filesystem::read_symlink(m_parentView->currentSelectedPath).string()).c_str());
             }
