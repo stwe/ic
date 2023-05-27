@@ -39,6 +39,8 @@ ic::data::View::View(ViewType t_viewType)
     m_infoWidget = std::make_unique<widget::InfoWidget>(this);
 
     AppendListeners();
+
+    dirty = true; // todo read event
 }
 
 ic::data::View::~View() noexcept
@@ -76,9 +78,14 @@ void ic::data::View::SetInfoSize(const float t_x, const float t_y) const
 
 void ic::data::View::Update()
 {
-    for (const auto& entry : std::filesystem::directory_iterator(currentPath))
+    if (dirty)
     {
-        entries.filesAndDirs.emplace(entry.path());
+        for (const auto& entry : std::filesystem::directory_iterator(currentPath))
+        {
+            entries.filesAndDirs.emplace(entry.path());
+        }
+
+        dirty = false;
     }
 }
 
@@ -103,6 +110,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path.parent_path();
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
@@ -118,6 +126,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
@@ -133,6 +142,22 @@ void ic::data::View::AppendListeners()
                     currentSelectedPath = t_event.path;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
+                }
+            })
+    );
+
+    application::Application::event_dispatcher.appendListener(
+        event::IcEventType::CHANGE_ROOT_PATH,
+        eventpp::argumentAdapter<void(const event::ChangeRootPathEvent&)>(
+            [this](const event::ChangeRootPathEvent& t_event) {
+                if (!t_event.path.empty() && t_event.viewType == viewType)
+                {
+                    currentPath = t_event.path.parent_path();
+                    currentSelectedPath.clear();
+                    entries.filesAndDirs.clear();
+                    dirty = true;
+                    application::Application::current_view_type = viewType;
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type CHANGE_ROOT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );

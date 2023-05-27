@@ -85,12 +85,11 @@ void ic::widget::ViewWidget::Render() const
     {
         if (std::string label(1, drive); ImGui::Button(label.c_str()))
         {
-            m_parentView->currentPath = std::filesystem::path(label.append(":\\"));
-            m_parentView->currentSelectedPath.clear();
-            m_parentView->entries.filesAndDirs.clear();
-            IC_LOG_DEBUG("[ViewWidget::Render()] Change to drive {}.", label);
+            application::Application::event_dispatcher.dispatch(
+                event::IcEventType::CHANGE_ROOT_PATH,
+                event::ChangeRootPathEvent(std::filesystem::path(label.append(":\\")), m_parentView->viewType)
+            );
         }
-
         ImGui::SameLine();
     }
 #endif

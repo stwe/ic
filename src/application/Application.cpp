@@ -141,6 +141,13 @@ void ic::application::Application::Render() const
     widget::BottomMenuWidget::SetPosition(0.0f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 2.0f));
     widget::BottomMenuWidget::SetSize(static_cast<float>(m_window->width), ImGui::GetFrameHeight() * 2.0f);
     widget::BottomMenuWidget::Render();
+
+#ifdef IC_DEBUG_BUILD
+    ImGui::Begin("Debug");
+    const auto fps{ static_cast<double>(ImGui::GetIO().Framerate) };
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0/fps, fps);
+    ImGui::End();
+#endif
 }
 
 //-------------------------------------------------

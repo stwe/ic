@@ -62,6 +62,11 @@ namespace ic::data
          */
         std::filesystem::path currentSelectedPath;
 
+        /**
+         * Is set when the entries need to be updated.
+         */
+        bool dirty{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------

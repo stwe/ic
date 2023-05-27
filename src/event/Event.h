@@ -35,7 +35,8 @@ namespace ic::event
         // events
         UP_DIR,
         IN_DIR,
-        SELECT_PATH
+        SELECT_PATH,
+        CHANGE_ROOT_PATH
     };
 
     //-------------------------------------------------
@@ -86,6 +87,15 @@ namespace ic::event
             : IcEvent(std::move(t_path), t_viewType)
         {
             eventType = IcEventType::SELECT_PATH;
+        }
+    };
+
+    struct ChangeRootPathEvent: IcEvent
+    {
+        ChangeRootPathEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : IcEvent(std::move(t_path), t_viewType)
+        {
+            eventType = IcEventType::CHANGE_ROOT_PATH;
         }
     };
 }
