@@ -40,7 +40,10 @@ ic::data::View::View(ViewType t_viewType)
 
     AppendListeners();
 
-    dirty = true; // todo read event
+    application::Application::event_dispatcher.dispatch(
+        event::IcEventType::DIRTY,
+        event::DirtyEvent(viewType)
+    );
 }
 
 ic::data::View::~View() noexcept
@@ -152,12 +155,28 @@ void ic::data::View::AppendListeners()
             [this](const event::ChangeRootPathEvent& t_event) {
                 if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
-                    currentPath = t_event.path.parent_path();
+                    currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
                     dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type CHANGE_ROOT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
+                }
+            })
+    );
+
+    application::Application::event_dispatcher.appendListener(
+        event::IcEventType::DIRTY,
+        eventpp::argumentAdapter<void(const event::DirtyEvent&)>(
+            [this](const event::DirtyEvent& t_event) {
+                if (!t_event.path.empty() && t_event.viewType == viewType)
+                {
+                    currentPath = t_event.path;
+                    currentSelectedPath.clear();
+                    entries.filesAndDirs.clear();
+                    dirty = true;
+                    application::Application::current_view_type = viewType;
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type DIRTY for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );

@@ -36,7 +36,8 @@ namespace ic::event
         UP_DIR,
         IN_DIR,
         SELECT_PATH,
-        CHANGE_ROOT_PATH
+        CHANGE_ROOT_PATH,
+        DIRTY
     };
 
     //-------------------------------------------------
@@ -96,6 +97,21 @@ namespace ic::event
             : IcEvent(std::move(t_path), t_viewType)
         {
             eventType = IcEventType::CHANGE_ROOT_PATH;
+        }
+    };
+
+    struct DirtyEvent: IcEvent
+    {
+        explicit DirtyEvent(data::ViewType t_viewType)
+            : IcEvent(std::filesystem::current_path(), t_viewType)
+        {
+            eventType = IcEventType::DIRTY;
+        }
+
+        DirtyEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+            : IcEvent(std::move(t_path), t_viewType)
+        {
+            eventType = IcEventType::DIRTY;
         }
     };
 }
