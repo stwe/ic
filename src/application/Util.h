@@ -30,6 +30,7 @@ namespace ic::application
         // Utils
         //-------------------------------------------------
 
+        [[nodiscard]] static bool IsRootDirectory(const std::filesystem::path& t_path);
         [[nodiscard]] static std::string ToZeroLead(const std::string& t_time);
         [[nodiscard]] static std::string LastWriteTimeToStr(const std::filesystem::file_time_type& t_fileTime);
         [[nodiscard]] static std::string GetHumanReadableSize(unsigned long long t_bytes);

@@ -54,15 +54,6 @@ void ic::application::Application::Run()
 }
 
 //-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-bool ic::application::Application::IsRootDirectory(const std::filesystem::path& t_path)
-{
-    return root_paths.contains(t_path);
-}
-
-//-------------------------------------------------
 // Logic
 //-------------------------------------------------
 

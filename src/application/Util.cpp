@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Util.h"
+#include "Application.h"
 
 #if defined(_WIN64) && defined(_MSC_VER)
     #define NOMINMAX
@@ -28,6 +29,11 @@
 //-------------------------------------------------
 // Utils
 //-------------------------------------------------
+
+bool ic::application::Util::IsRootDirectory(const std::filesystem::path& t_path)
+{
+    return Application::root_paths.contains(t_path);
+}
 
 std::string ic::application::Util::ToZeroLead(const std::string& t_time)
 {

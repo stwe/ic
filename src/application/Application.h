@@ -58,12 +58,6 @@ namespace ic::application
 
         void Run();
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
-        [[nodiscard]] static bool IsRootDirectory(const std::filesystem::path& t_path);
-
     protected:
 
     private:
