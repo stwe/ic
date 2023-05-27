@@ -21,7 +21,6 @@
 #include "IcAssert.h"
 #include "application/Application.h"
 #include "application/Util.h"
-#include "data/View.h"
 #include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
@@ -233,11 +232,25 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
     }
     else if (application::Util::IsHiddenDirectory(t_path.wstring()))
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
+        if (m_parentView->selectedEntries.contains(t_path))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
+        }
     }
     else
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+        if (m_parentView->selectedEntries.contains(t_path))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+        }
     }
 
     if (renderAsText)
@@ -264,6 +277,19 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
                     event::IcEventType::SELECT_PATH,
                     event::SelectPathEvent(t_path, m_parentView->viewType)
                 );
+
+                if (ImGui::GetIO().KeyShift)
+                {
+                    if (m_parentView->selectedEntries.contains(t_path))
+                    {
+                        m_parentView->selectedEntries.erase(t_path);
+                    }
+                    else
+                    {
+                        m_parentView->selectedEntries.emplace(t_path);
+                    }
+                }
+
                 ImGui::PopStyleColor(1);
                 return false;
             }
@@ -333,13 +359,36 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
 void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) const
 {
 #if defined(_WIN64) && defined(_MSC_VER)
+    if (m_parentView->selectedEntries.contains(t_path))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+    }
+
     if (ImGui::Selectable(application::Util::WstringConv(t_path).c_str(), false))
     {
         application::Application::event_dispatcher.dispatch(
             event::IcEventType::SELECT_PATH,
             event::SelectPathEvent(t_path, m_parentView->viewType)
         );
+
+        if (ImGui::GetIO().KeyShift)
+        {
+            if (m_parentView->selectedEntries.contains(t_path))
+            {
+                m_parentView->selectedEntries.erase(t_path);
+            }
+            else
+            {
+                m_parentView->selectedEntries.emplace(t_path);
+            }
+        }
     }
+
+    ImGui::PopStyleColor(1);
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     std::string pre;
     if (access(t_path.string().c_str(), R_OK) == 0)

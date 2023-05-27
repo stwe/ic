@@ -19,6 +19,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_set>
 #include "Entries.h"
 #include "Comparator.h"
 
@@ -66,6 +67,11 @@ namespace ic::data
          * Is set when the entries need to be updated.
          */
         bool dirty{ false };
+
+        /**
+         * All entries that were selected with the mouse.
+         */
+        std::unordered_set<std::filesystem::path> selectedEntries;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

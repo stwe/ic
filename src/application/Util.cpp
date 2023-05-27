@@ -50,7 +50,7 @@ std::string ic::application::Util::LastWriteTimeToStr(const std::filesystem::fil
     return ToZeroLead(std::to_string(tminfo->tm_mday)).append(".").append(ToZeroLead(std::to_string(tminfo->tm_mon))).append(".").append(std::to_string(tminfo->tm_year + 1900)).append(" ").append(ToZeroLead(std::to_string(tminfo->tm_hour))).append(":").append(ToZeroLead(std::to_string(tminfo->tm_min)));
 }
 
-std::string ic::application::Util::GetHumanReadableSize(const unsigned long t_bytes)
+std::string ic::application::Util::GetHumanReadableSize(const unsigned long long t_bytes)
 {
     static constexpr float gb{ 1024.0f * 1024.0f * 1024.0f };
     static constexpr float mb{ 1024.0f * 1024.0f };

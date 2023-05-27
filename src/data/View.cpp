@@ -113,6 +113,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path.parent_path();
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    selectedEntries.clear();
                     dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type UP_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
@@ -129,6 +130,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    selectedEntries.clear();
                     dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type IN_DIR for view type {}.", std::string(magic_enum::enum_name(viewType)));
@@ -158,6 +160,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    selectedEntries.clear();
                     dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type CHANGE_ROOT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
@@ -174,6 +177,7 @@ void ic::data::View::AppendListeners()
                     currentPath = t_event.path;
                     currentSelectedPath.clear();
                     entries.filesAndDirs.clear();
+                    selectedEntries.clear();
                     dirty = true;
                     application::Application::current_view_type = viewType;
                     IC_LOG_DEBUG("[View::AppendListeners()] Event type DIRTY for view type {}.", std::string(magic_enum::enum_name(viewType)));

@@ -144,8 +144,32 @@ void ic::application::Application::Render() const
 
 #ifdef IC_DEBUG_BUILD
     ImGui::Begin("Debug");
+
     const auto fps{ static_cast<double>(ImGui::GetIO().Framerate) };
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // red
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0/fps, fps);
+    ImGui::PopStyleColor(1);
+
+    ImGui::Separator();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    ImGui::Text("Left");
+    ImGui::PopStyleColor(1);
+    for (const auto& entry : m_leftView->selectedEntries)
+    {
+        ImGui::TextUnformatted(entry.filename().string().c_str());
+    }
+
+    ImGui::Separator();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    ImGui::Text("Right");
+    ImGui::PopStyleColor(1);
+    for (const auto& entry : m_rightView->selectedEntries)
+    {
+        ImGui::TextUnformatted(entry.filename().string().c_str());
+    }
+
     ImGui::End();
 #endif
 }

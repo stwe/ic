@@ -32,7 +32,7 @@ namespace ic::application
 
         [[nodiscard]] static std::string ToZeroLead(const std::string& t_time);
         [[nodiscard]] static std::string LastWriteTimeToStr(const std::filesystem::file_time_type& t_fileTime);
-        [[nodiscard]] static std::string GetHumanReadableSize(unsigned long t_bytes);
+        [[nodiscard]] static std::string GetHumanReadableSize(unsigned long long t_bytes);
         [[nodiscard]] static std::string FloatToString(float t_val);
 
         //-------------------------------------------------
