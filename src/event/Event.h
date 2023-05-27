@@ -35,7 +35,7 @@ namespace ic::event
         // events
         UP_DIR,
         IN_DIR,
-        SELECT_PATH,
+        SHOW_PATH_INFO,
         CHANGE_ROOT_PATH,
         DIRTY
     };
@@ -82,12 +82,12 @@ namespace ic::event
         }
     };
 
-    struct SelectPathEvent: IcEvent
+    struct ShowPathInfoEvent: IcEvent
     {
-        SelectPathEvent(std::filesystem::path t_path, data::ViewType t_viewType)
+        ShowPathInfoEvent(std::filesystem::path t_path, data::ViewType t_viewType)
             : IcEvent(std::move(t_path), t_viewType)
         {
-            eventType = IcEventType::SELECT_PATH;
+            eventType = IcEventType::SHOW_PATH_INFO;
         }
     };
 

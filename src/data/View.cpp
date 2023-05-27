@@ -139,14 +139,14 @@ void ic::data::View::AppendListeners()
     );
 
     application::Application::event_dispatcher.appendListener(
-        event::IcEventType::SELECT_PATH,
-        eventpp::argumentAdapter<void(const event::SelectPathEvent&)>(
-            [this](const event::SelectPathEvent& t_event) {
+        event::IcEventType::SHOW_PATH_INFO,
+        eventpp::argumentAdapter<void(const event::ShowPathInfoEvent&)>(
+            [this](const event::ShowPathInfoEvent& t_event) {
                 if (!t_event.path.empty() && t_event.viewType == viewType)
                 {
                     currentSelectedPath = t_event.path;
                     application::Application::current_view_type = viewType;
-                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SHOW_PATH_INFO for view type {}.", std::string(magic_enum::enum_name(viewType)));
                 }
             })
     );

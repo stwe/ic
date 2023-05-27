@@ -274,8 +274,8 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
             else // single click
             {
                 application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::SELECT_PATH,
-                    event::SelectPathEvent(t_path, m_parentView->viewType)
+                    event::IcEventType::SHOW_PATH_INFO,
+                    event::ShowPathInfoEvent(t_path, m_parentView->viewType)
                 );
 
                 if (ImGui::GetIO().KeyShift)
@@ -371,8 +371,8 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
     if (ImGui::Selectable(application::Util::WstringConv(t_path).c_str(), false))
     {
         application::Application::event_dispatcher.dispatch(
-            event::IcEventType::SELECT_PATH,
-            event::SelectPathEvent(t_path, m_parentView->viewType)
+            event::IcEventType::SHOW_PATH_INFO,
+            event::ShowPathInfoEvent(t_path, m_parentView->viewType)
         );
 
         if (ImGui::GetIO().KeyShift)
