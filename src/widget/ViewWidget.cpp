@@ -95,6 +95,8 @@ void ic::widget::ViewWidget::Render() const
 
     ImGui::NewLine();
 
+    ImGui::TextUnformatted(m_parentView->currentPath.string().c_str());
+
     if (ImGui::BeginTable((std::string("##").append(name).append("filesTable")).c_str(), 3, ImGuiTableFlags_BordersV))
     {
         RenderHeader();
@@ -280,14 +282,10 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
 
                 if (ImGui::GetIO().KeyShift)
                 {
-                    if (m_parentView->selectedEntries.contains(t_path))
-                    {
-                        m_parentView->selectedEntries.erase(t_path);
-                    }
-                    else
-                    {
-                        m_parentView->selectedEntries.emplace(t_path);
-                    }
+                    application::Application::event_dispatcher.dispatch(
+                        event::IcEventType::SELECT_PATH,
+                        event::SelectPathEvent(t_path, m_parentView->viewType)
+                    );
                 }
 
                 ImGui::PopStyleColor(1);
@@ -377,14 +375,10 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
 
         if (ImGui::GetIO().KeyShift)
         {
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                m_parentView->selectedEntries.erase(t_path);
-            }
-            else
-            {
-                m_parentView->selectedEntries.emplace(t_path);
-            }
+            application::Application::event_dispatcher.dispatch(
+                event::IcEventType::SELECT_PATH,
+                event::SelectPathEvent(t_path, m_parentView->viewType)
+            );
         }
     }
 

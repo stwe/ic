@@ -184,4 +184,25 @@ void ic::data::View::AppendListeners()
                 }
             })
     );
+
+    application::Application::event_dispatcher.appendListener(
+        event::IcEventType::SELECT_PATH,
+        eventpp::argumentAdapter<void(const event::SelectPathEvent&)>(
+            [this](const event::SelectPathEvent& t_event) {
+                if (!t_event.path.empty() && t_event.viewType == viewType)
+                {
+                    if (selectedEntries.contains(t_event.path))
+                    {
+                        selectedEntries.erase(t_event.path);
+                    }
+                    else
+                    {
+                        selectedEntries.emplace(t_event.path);
+                    }
+
+                    application::Application::current_view_type = viewType;
+                    IC_LOG_DEBUG("[View::AppendListeners()] Event type SELECT_PATH for view type {}.", std::string(magic_enum::enum_name(viewType)));
+                }
+            })
+    );
 }
