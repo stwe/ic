@@ -80,17 +80,7 @@ void ic::widget::ViewWidget::Render() const
     );
 
 #if defined(_WIN64) && defined(_MSC_VER)
-    for (const auto& drive : application::Util::GetAvailableDriveLetters())
-    {
-        if (std::string label(1, drive); ImGui::Button(label.c_str()))
-        {
-            application::Application::event_dispatcher.dispatch(
-                event::IcEventType::CHANGE_ROOT_PATH,
-                event::ChangeRootPathEvent(std::filesystem::path(label.append(":\\")), m_parentView->viewType)
-            );
-        }
-        ImGui::SameLine();
-    }
+    RenderDriveLetters();
 #endif
 
     ImGui::NewLine();
@@ -209,6 +199,23 @@ void ic::widget::ViewWidget::RenderRows() const
         ++id;
     }
 }
+
+#if defined(_WIN64) && defined(_MSC_VER)
+void ic::widget::ViewWidget::RenderDriveLetters() const
+{
+    for (const auto& drive : application::Util::GetAvailableDriveLetters())
+    {
+        if (std::string label(1, drive); ImGui::Button(label.c_str()))
+        {
+            application::Application::event_dispatcher.dispatch(
+                event::IcEventType::CHANGE_ROOT_PATH,
+                event::ChangeRootPathEvent(std::filesystem::path(label.append(":\\")), m_parentView->viewType)
+            );
+        }
+        ImGui::SameLine();
+    }
+}
+#endif
 
 //-------------------------------------------------
 // Render

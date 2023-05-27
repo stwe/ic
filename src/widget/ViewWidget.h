@@ -80,6 +80,10 @@ namespace ic::widget
         void RenderFirstRow() const;
         void RenderRows() const;
 
+#if defined(_WIN64) && defined(_MSC_VER)
+        void RenderDriveLetters() const;
+#endif
+
         //-------------------------------------------------
         // Render
         //-------------------------------------------------

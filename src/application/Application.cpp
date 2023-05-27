@@ -23,6 +23,7 @@
 #include "data/View.h"
 #include "widget/MainMenuWidget.h"
 #include "widget/BottomMenuWidget.h"
+#include "widget/DebugWidget.h"
 #include "vendor/imgui/imgui_impl_sdl2.h"
 
 //-------------------------------------------------
@@ -61,20 +62,7 @@ void ic::application::Application::Init()
 {
     IC_LOG_DEBUG("[Application::Init()] Initializing application ...");
 
-#if defined(_WIN64) && defined(_MSC_VER)
-    for (const auto drive : Util::GetAvailableDriveLetters())
-    {
-        std::string label(1, drive);
-        root_paths.emplace(label.append(":\\"));
-    }
-    IC_LOG_DEBUG("[Application::Init()] Found {} drive letters.", root_paths.size());
-#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
-    root_paths.emplace("/");
-#else
-    #error Unsupported platform or compiler!
-#endif
-
-    IC_ASSERT(!root_paths.empty(), "[Application::Init()] Invalid number of root paths.")
+    InitRootPaths();
 
     m_window = std::make_unique<Window>(
         "ic",
@@ -134,34 +122,7 @@ void ic::application::Application::Render() const
     widget::BottomMenuWidget::Render();
 
 #ifdef IC_DEBUG_BUILD
-    ImGui::Begin("Debug");
-
-    const auto fps{ static_cast<double>(ImGui::GetIO().Framerate) };
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // red
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0/fps, fps);
-    ImGui::PopStyleColor(1);
-
-    ImGui::Separator();
-
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-    ImGui::Text("Left");
-    ImGui::PopStyleColor(1);
-    for (const auto& entry : m_leftView->selectedEntries)
-    {
-        ImGui::TextUnformatted(entry.filename().string().c_str());
-    }
-
-    ImGui::Separator();
-
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-    ImGui::Text("Right");
-    ImGui::PopStyleColor(1);
-    for (const auto& entry : m_rightView->selectedEntries)
-    {
-        ImGui::TextUnformatted(entry.filename().string().c_str());
-    }
-
-    ImGui::End();
+    widget::DebugWidget::Render(*m_leftView, *m_rightView);
 #endif
 }
 
@@ -185,4 +146,26 @@ void ic::application::Application::Loop()
     }
 
     IC_LOG_DEBUG("[Application::Loop()] The application loop has ended.");
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void ic::application::Application::InitRootPaths()
+{
+#if defined(_WIN64) && defined(_MSC_VER)
+    for (const auto drive : Util::GetAvailableDriveLetters())
+    {
+        std::string label(1, drive);
+        root_paths.emplace(label.append(":\\"));
+    }
+    IC_LOG_DEBUG("[Application::InitRootPaths()] Found {} drive letters.", root_paths.size());
+#elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
+    root_paths.emplace("/");
+#else
+    #error Unsupported platform or compiler!
+#endif
+
+    IC_ASSERT(!root_paths.empty(), "[Application::InitRootPaths()] Invalid number of root paths.")
 }
