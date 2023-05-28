@@ -256,37 +256,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
     {
         if (ImGui::Selectable(pre.append(application::Util::WstringConv(t_path)).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            // double click
-            if (ImGui::IsMouseDoubleClicked(0))
-            {
-                application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::IN_DIR,
-                    event::InDirEvent(t_path, m_parentView->viewType)
-                );
-
-                ImGui::PopStyleColor(1);
-
-                return true;
-            }
-            else // single click
-            {
-                application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::SHOW_PATH_INFO,
-                    event::ShowPathInfoEvent(t_path, m_parentView->viewType)
-                );
-
-                if (ImGui::GetIO().KeyShift)
-                {
-                    application::Application::event_dispatcher.dispatch(
-                        event::IcEventType::SELECT_PATH,
-                        event::SelectPathEvent(t_path, m_parentView->viewType)
-                    );
-                }
-
-                ImGui::PopStyleColor(1);
-
-                return false;
-            }
+            return DirectoryDispatchEvents(t_path);
         }
     }
 
@@ -310,37 +280,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
 
         if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            // double click
-            if (ImGui::IsMouseDoubleClicked(0))
-            {
-                application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::IN_DIR,
-                    event::InDirEvent(t_path, m_parentView->viewType)
-                );
-
-                ImGui::PopStyleColor(1);
-
-                return true;
-            }
-            else // single click
-            {
-                application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::SHOW_PATH_INFO,
-                    event::ShowPathInfoEvent(t_path, m_parentView->viewType)
-                );
-
-                if (ImGui::GetIO().KeyShift)
-                {
-                    application::Application::event_dispatcher.dispatch(
-                        event::IcEventType::SELECT_PATH,
-                        event::SelectPathEvent(t_path, m_parentView->viewType)
-                    );
-                }
-
-                ImGui::PopStyleColor(1);
-
-                return false;
-            }
+            return DirectoryDispatchEvents(t_path);
         }
 
         ImGui::PopStyleColor(1);
@@ -366,18 +306,7 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
 
     if (ImGui::Selectable(application::Util::WstringConv(t_path).c_str(), false))
     {
-        application::Application::event_dispatcher.dispatch(
-            event::IcEventType::SHOW_PATH_INFO,
-            event::ShowPathInfoEvent(t_path, m_parentView->viewType)
-        );
-
-        if (ImGui::GetIO().KeyShift)
-        {
-            application::Application::event_dispatcher.dispatch(
-                event::IcEventType::SELECT_PATH,
-                event::SelectPathEvent(t_path, m_parentView->viewType)
-            );
-        }
+        FileDispatchEvents(t_path);
     }
 
     ImGui::PopStyleColor(1);
@@ -401,18 +330,7 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
 
         if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false))
         {
-            application::Application::event_dispatcher.dispatch(
-                event::IcEventType::SHOW_PATH_INFO,
-                event::ShowPathInfoEvent(t_path, m_parentView->viewType)
-            );
-
-            if (ImGui::GetIO().KeyShift)
-            {
-                application::Application::event_dispatcher.dispatch(
-                    event::IcEventType::SELECT_PATH,
-                    event::SelectPathEvent(t_path, m_parentView->viewType)
-                );
-            }
+            FileDispatchEvents(t_path);
         }
 
         ImGui::PopStyleColor(1);
@@ -457,6 +375,56 @@ void ic::widget::ViewWidget::PushDefaultColor(const std::filesystem::path& t_pat
     else
     {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+    }
+}
+
+bool ic::widget::ViewWidget::DirectoryDispatchEvents(const std::filesystem::path& t_path) const
+{
+    // double click
+    if (ImGui::IsMouseDoubleClicked(0))
+    {
+        application::Application::event_dispatcher.dispatch(
+            event::IcEventType::IN_DIR,
+            event::InDirEvent(t_path, m_parentView->viewType)
+        );
+
+        ImGui::PopStyleColor(1);
+
+        return true;
+    }
+
+    // single click
+    application::Application::event_dispatcher.dispatch(
+        event::IcEventType::SHOW_PATH_INFO,
+        event::ShowPathInfoEvent(t_path, m_parentView->viewType)
+    );
+
+    if (ImGui::GetIO().KeyShift)
+    {
+        application::Application::event_dispatcher.dispatch(
+            event::IcEventType::SELECT_PATH,
+            event::SelectPathEvent(t_path, m_parentView->viewType)
+        );
+    }
+
+    ImGui::PopStyleColor(1);
+
+    return false;
+}
+
+void ic::widget::ViewWidget::FileDispatchEvents(const std::filesystem::path& t_path) const
+{
+    application::Application::event_dispatcher.dispatch(
+        event::IcEventType::SHOW_PATH_INFO,
+        event::ShowPathInfoEvent(t_path, m_parentView->viewType)
+    );
+
+    if (ImGui::GetIO().KeyShift)
+    {
+        application::Application::event_dispatcher.dispatch(
+            event::IcEventType::SELECT_PATH,
+            event::SelectPathEvent(t_path, m_parentView->viewType)
+        );
     }
 }
 
