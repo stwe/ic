@@ -19,6 +19,7 @@
 #pragma once
 
 #include <filesystem>
+#include <algorithm>
 
 namespace ic::data
 {
