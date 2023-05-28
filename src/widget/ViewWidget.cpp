@@ -241,25 +241,11 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
     }
     else if (application::Util::IsHiddenDirectory(t_path.wstring()))
     {
-        if (m_parentView->selectedEntries.contains(t_path))
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-        }
-        else
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
-        }
+        PushHiddenColor(t_path);
     }
     else
     {
-        if (m_parentView->selectedEntries.contains(t_path))
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-        }
-        else
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
-        }
+        PushDefaultColor(t_path);
     }
 
     if (renderAsText)
@@ -277,7 +263,9 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
                     event::IcEventType::IN_DIR,
                     event::InDirEvent(t_path, m_parentView->viewType)
                 );
+
                 ImGui::PopStyleColor(1);
+
                 return true;
             }
             else // single click
@@ -296,6 +284,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
                 }
 
                 ImGui::PopStyleColor(1);
+
                 return false;
             }
         }
@@ -373,14 +362,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
 void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) const
 {
 #if defined(_WIN64) && defined(_MSC_VER)
-    if (m_parentView->selectedEntries.contains(t_path))
-    {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-    }
-    else
-    {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
-    }
+    PushDefaultColor(t_path);
 
     if (ImGui::Selectable(application::Util::WstringConv(t_path).c_str(), false))
     {
