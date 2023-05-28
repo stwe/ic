@@ -20,42 +20,76 @@
 #include <SDL_events.h>
 #include <memory>
 #include "MainMenuWidget.h"
+#include "application/Application.h"
+#include "IcAssert.h"
+
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+ic::widget::MainMenuWidget::MainMenuWidget(data::View* t_parentLeftView, data::View* t_parentRightView)
+    : m_parentLeftView{ t_parentLeftView }
+    , m_parentRightView{ t_parentRightView }
+{
+    IC_ASSERT(m_parentLeftView, "[MainMenuWidget::MainMenuWidget()] Null pointer.")
+    IC_ASSERT(m_parentRightView, "[MainMenuWidget::MainMenuWidget()] Null pointer.")
+
+    IC_LOG_DEBUG("[MainMenuWidget::MainMenuWidget()] Create MainMenuWidget.");
+}
+
+ic::widget::MainMenuWidget::~MainMenuWidget() noexcept
+{
+    IC_LOG_DEBUG("[MainMenuWidget::~MainMenuWidget()] Destruct MainMenuWidget.");
+}
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-void ic::widget::MainMenuWidget::Render()
+void ic::widget::MainMenuWidget::Render() const
 {
     if (ImGui::BeginMainMenuBar())
     {
         // left
-        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
         if (ImGui::BeginMenu("Left##mainMenuLeft"))
         {
+            if (ImGui::MenuItem("Rescan##mainMenuLeftRescan"))
+            {
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::DIRTY,
+                    event::DirtyEvent(m_parentLeftView->currentPath, data::ViewType::LEFT)
+                );
+            }
+
             ImGui::EndMenu();
         }
-        ImGui::PopItemFlag();
 
         // file
         if (ImGui::BeginMenu("File##mainMenuFile"))
         {
-            if (ImGui::MenuItem("Exit", "F10"))
+            if (ImGui::MenuItem("Exit##mainMenuExit"))
             {
                 auto event{ std::make_unique<SDL_Event>() };
                 event->type = SDL_QUIT;
                 SDL_PushEvent(event.release());
             }
+
             ImGui::EndMenu();
         }
 
         // right
-        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
         if (ImGui::BeginMenu("Right##mainMenuRight"))
         {
+            if (ImGui::MenuItem("Rescan##mainMenuRightRescan"))
+            {
+                application::Application::event_dispatcher.dispatch(
+                    event::IcEventType::DIRTY,
+                    event::DirtyEvent(m_parentRightView->currentPath, data::ViewType::RIGHT)
+                );
+            }
+
             ImGui::EndMenu();
         }
-        ImGui::PopItemFlag();
 
         ImGui::EndMainMenuBar();
     }

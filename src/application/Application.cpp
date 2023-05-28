@@ -73,6 +73,8 @@ void ic::application::Application::Init()
     m_leftView = std::make_unique<data::View>(data::ViewType::LEFT);
     m_rightView = std::make_unique<data::View>(data::ViewType::RIGHT);
 
+    m_mainMenuWidget = std::make_unique<widget::MainMenuWidget>(m_leftView.get(), m_rightView.get());
+
     IC_LOG_DEBUG("[Application::Init()] The application was successfully initialized.");
 }
 
@@ -103,7 +105,7 @@ void ic::application::Application::Update()
 
 void ic::application::Application::Render() const
 {
-    widget::MainMenuWidget::Render();
+    m_mainMenuWidget->Render();
 
     m_leftView->SetPosition(0.0f, ImGui::GetFrameHeight());
     m_leftView->SetSize(static_cast<float>(m_window->width) * 0.5f, static_cast<float>(m_window->height) - (ImGui::GetFrameHeight() * 5.0f));

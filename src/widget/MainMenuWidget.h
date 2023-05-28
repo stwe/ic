@@ -18,6 +18,11 @@
 
 #pragma once
 
+namespace ic::data
+{
+    class View;
+}
+
 namespace ic::widget
 {
     class MainMenuWidget
@@ -29,22 +34,29 @@ namespace ic::widget
 
         MainMenuWidget() = delete;
 
+        MainMenuWidget(data::View* t_parentLeftView, data::View* t_parentRightView);
+
         MainMenuWidget(const MainMenuWidget& t_other) = delete;
         MainMenuWidget(MainMenuWidget&& t_other) noexcept = delete;
         MainMenuWidget& operator=(const MainMenuWidget& t_other) = delete;
         MainMenuWidget& operator=(MainMenuWidget&& t_other) noexcept = delete;
 
-        ~MainMenuWidget() noexcept = delete;
+        ~MainMenuWidget() noexcept;
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        static void Render();
+        void Render() const;
 
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
+        data::View* m_parentLeftView{ nullptr };
+        data::View* m_parentRightView{ nullptr };
     };
 }

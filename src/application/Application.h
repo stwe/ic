@@ -22,6 +22,11 @@
 #include "event/Event.h"
 #include "vendor/ini/ini.h"
 
+namespace ic::widget
+{
+    class MainMenuWidget;
+}
+
 namespace ic::application
 {
     class Window;
@@ -66,6 +71,8 @@ namespace ic::application
         //-------------------------------------------------
 
         std::unique_ptr<Window> m_window;
+
+        std::unique_ptr<widget::MainMenuWidget> m_mainMenuWidget;
 
         std::unique_ptr<data::View> m_leftView;
         std::unique_ptr<data::View> m_rightView;
