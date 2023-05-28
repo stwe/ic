@@ -36,7 +36,12 @@ namespace ic::data
             }
 
             // Both are either directories or files.
-            return t_a.string() < t_b.string();
+            std::string a = t_a.string();
+            std::string b = t_b.string();
+            std::transform(a.begin(), a.end(), a.begin(), [](unsigned char c){ return std::tolower(c); });
+            std::transform(b.begin(), b.end(), b.begin(), [](unsigned char c){ return std::tolower(c); });
+
+            return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
         }
     };
 }
