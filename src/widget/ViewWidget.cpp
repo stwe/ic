@@ -308,36 +308,15 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "~";
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
-            }
+            PushSymlinkColor(t_path);
         }
         else if (application::Util::IsHidden(t_path))
         {
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
-            }
+            PushHiddenColor(t_path);
         }
         else
         {
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
-            }
+            PushDefaultColor(t_path);
         }
 
         if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
@@ -349,7 +328,9 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
                     event::IcEventType::IN_DIR,
                     event::InDirEvent(t_path, m_parentView->viewType)
                 );
+
                 ImGui::PopStyleColor(1);
+
                 return true;
             }
             else // single click
@@ -368,6 +349,7 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
                 }
 
                 ImGui::PopStyleColor(1);
+
                 return false;
             }
         }
@@ -379,15 +361,9 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "~";
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
-        }
-        else
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
         }
 
-        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
-        ImGui::PopStyleColor(1);
+        RenderAccessDenied(t_path, pre);
     }
 #endif
 
@@ -430,36 +406,15 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
         if (std::filesystem::is_symlink(t_path))
         {
             pre = "@";
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
-            }
+            PushSymlinkColor(t_path);
         }
         else if (application::Util::IsHidden(t_path))
         {
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
-            }
+            PushHiddenColor(t_path);
         }
         else
         {
-            if (m_parentView->selectedEntries.contains(t_path))
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
-            }
+            PushDefaultColor(t_path);
         }
 
         if (ImGui::Selectable(pre.append(t_path.filename().string()).c_str(), false))
@@ -482,9 +437,50 @@ void ic::widget::ViewWidget::RenderFile(const std::filesystem::path& t_path) con
     }
     else
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
-        ImGui::TextUnformatted(pre.append(t_path.filename().string()).c_str());
-        ImGui::PopStyleColor(1);
+        RenderAccessDenied(t_path, pre);
     }
 #endif
+}
+
+void ic::widget::ViewWidget::PushSymlinkColor(const std::filesystem::path& t_path) const
+{
+    if (m_parentView->selectedEntries.contains(t_path))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
+    }
+}
+
+void ic::widget::ViewWidget::PushHiddenColor(const std::filesystem::path& t_path) const
+{
+    if (m_parentView->selectedEntries.contains(t_path))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // grey
+    }
+}
+
+void ic::widget::ViewWidget::PushDefaultColor(const std::filesystem::path& t_path) const
+{
+    if (m_parentView->selectedEntries.contains(t_path))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // white
+    }
+}
+
+void ic::widget::ViewWidget::RenderAccessDenied(const std::filesystem::path& t_path, const std::string& t_prefix)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
+    ImGui::TextUnformatted(std::string(t_prefix).append(t_path.filename().string()).c_str());
+    ImGui::PopStyleColor(1);
 }
