@@ -16,7 +16,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <imgui.h>
 #include "ViewWidget.h"
 #include "IcAssert.h"
 #include "application/Application.h"
@@ -226,41 +225,36 @@ bool ic::widget::ViewWidget::RenderDirectory(const std::filesystem::path& t_path
     std::string pre = "/";
 
 #if defined(_WIN64) && defined(_MSC_VER)
-    auto renderAsText{ false };
+    if (!application::Util::IsAccessDenied(t_path.wstring()) && !application::Util::IsJunctionDirectory(t_path.wstring()))
+    {
+        if (application::Util::IsHiddenDirectory(t_path.wstring()))
+        {
+            PushHiddenColor(t_path);
+        }
+        else
+        {
+            PushDefaultColor(t_path);
+        }
 
-    if (application::Util::IsAccessDenied(t_path.wstring()))
-    {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
-        renderAsText = true;
-    }
-    else if(application::Util::IsJunctionDirectory(t_path.wstring()))
-    {
-        pre = "~";
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
-        renderAsText = true;
-    }
-    else if (application::Util::IsHiddenDirectory(t_path.wstring()))
-    {
-        PushHiddenColor(t_path);
-    }
-    else
-    {
-        PushDefaultColor(t_path);
-    }
-
-    if (renderAsText)
-    {
-        ImGui::TextUnformatted(pre.append(application::Util::WstringConv(t_path)).c_str());
-    }
-    else
-    {
         if (ImGui::Selectable(pre.append(application::Util::WstringConv(t_path)).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
             return DirectoryDispatchEvents(t_path);
         }
-    }
 
-    ImGui::PopStyleColor(1);
+        ImGui::PopStyleColor(1);
+    }
+    else
+    {
+        if(application::Util::IsJunctionDirectory(t_path.wstring()))
+        {
+            pre = "~";
+            RenderAccessDenied(pre.append(application::Util::WstringConv(t_path)).c_str(), ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+        }
+        else
+        {
+            RenderAccessDenied(pre.append(application::Util::WstringConv(t_path)).c_str(), ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        }
+    }
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 9)
     if (access(t_path.string().c_str(), R_OK) == 0)
     {
@@ -432,5 +426,12 @@ void ic::widget::ViewWidget::RenderAccessDenied(const std::filesystem::path& t_p
 {
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.0f, 0.0f, 1.0f)); // red
     ImGui::TextUnformatted(std::string(t_prefix).append(t_path.filename().string()).c_str());
+    ImGui::PopStyleColor(1);
+}
+
+void ic::widget::ViewWidget::RenderAccessDenied(const char* t_pathStr, ImVec4 t_color)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, t_color);
+    ImGui::TextUnformatted(t_pathStr);
     ImGui::PopStyleColor(1);
 }

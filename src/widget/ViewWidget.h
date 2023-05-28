@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <imgui.h>
 #include <filesystem>
 
 namespace ic::data
@@ -94,8 +95,11 @@ namespace ic::widget
         void PushSymlinkColor(const std::filesystem::path& t_path) const;
         void PushHiddenColor(const std::filesystem::path& t_path) const;
         void PushDefaultColor(const std::filesystem::path& t_path) const;
+
         [[nodiscard]] bool DirectoryDispatchEvents(const std::filesystem::path& t_path) const;
         void FileDispatchEvents(const std::filesystem::path& t_path) const;
+
         static void RenderAccessDenied(const std::filesystem::path& t_path, const std::string& t_prefix);
+        static void RenderAccessDenied(const char* t_pathStr, ImVec4 t_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
     };
 }
