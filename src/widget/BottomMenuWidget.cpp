@@ -21,6 +21,7 @@
 #include <filesystem>
 #include "BottomMenuWidget.h"
 #include "IcAssert.h"
+#include "application/Application.h"
 #include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------
@@ -116,7 +117,7 @@ void ic::widget::BottomMenuWidget::Render()
     {
         ImGui::Text("Create a new directory.");
 
-        std::string newPathStr;
+        static std::string newPathStr;
         ImGui::InputText("##bottomModalMkDirNewPath", &newPathStr);
 
         // close
@@ -128,16 +129,16 @@ void ic::widget::BottomMenuWidget::Render()
         ImGui::SameLine();
         if(ImGui::Button("Create##bottomModalMkDirCreate"))
         {
-            std::filesystem::path p;
+            // todo: event
 
-            /*
-            if (m_currentSide == Side::LEFT)
+            std::filesystem::path p;
+            if (application::Application::current_view_type == data::ViewType::LEFT)
             {
-                p = m_currentPathLeft / m_newPathStr;
+                p = m_parentLeftView->currentPath / newPathStr;
             }
             else
             {
-                p = m_currentPathRight / m_newPathStr;
+                p = m_parentRightView->currentPath / newPathStr;
             }
 
             if (!std::filesystem::exists(p))
@@ -145,19 +146,28 @@ void ic::widget::BottomMenuWidget::Render()
                 if (std::filesystem::create_directory(p))
                 {
                     IC_LOG_DEBUG("[BottomMenuWidget::Render()] Directory {} created successfully.", p.filename().string());
-                    m_entriesLeft = fs::read_from(m_currentPathLeft);
-                    m_entriesRight = fs::read_from(m_currentPathRight);
+
+                    application::Application::event_dispatcher.dispatch(
+                        event::IcEventType::DIRTY,
+                        event::DirtyEvent(m_parentLeftView->currentPath, data::ViewType::LEFT)
+                    );
+
+                    application::Application::event_dispatcher.dispatch(
+                        event::IcEventType::DIRTY,
+                        event::DirtyEvent(m_parentRightView->currentPath, data::ViewType::RIGHT)
+                    );
+
+                    newPathStr.clear();
                 }
                 else
                 {
-                    IC_LOG_DEBUG("[BottomMenuWidget::Render()] Failed to create directory.");
+                    IC_LOG_WARN("[BottomMenuWidget::Render()] Failed to create directory {}.", p.filename().string());
                 }
             }
             else
             {
-                IC_LOG_DEBUG("[BottomMenuWidget::Render()] Directory already exists.");
+                IC_LOG_WARN("[BottomMenuWidget::Render()] Directory {} already exists.", p.filename().string());
             }
-            */
 
             ImGui::CloseCurrentPopup();
         }
