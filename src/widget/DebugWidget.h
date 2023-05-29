@@ -18,7 +18,10 @@
 
 #pragma once
 
-#include "data/View.h"
+namespace ic::application
+{
+    class Application;
+}
 
 namespace ic::widget
 {
@@ -42,7 +45,7 @@ namespace ic::widget
         // Logic
         //-------------------------------------------------
 
-        static void Render(const data::View& t_leftView, const data::View& t_rightView);
+        static void Render(const application::Application* t_application);
 
     protected:
 

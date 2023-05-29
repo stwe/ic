@@ -25,6 +25,7 @@
 namespace ic::widget
 {
     class MainMenuWidget;
+    class BottomMenuWidget;
 }
 
 namespace ic::application
@@ -43,6 +44,9 @@ namespace ic::application
 
         inline static data::ViewType current_view_type{ data::ViewType::NONE };
         inline static std::set<std::filesystem::path> root_paths;
+
+        std::unique_ptr<data::View> leftView;
+        std::unique_ptr<data::View> rightView;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -73,9 +77,7 @@ namespace ic::application
         std::unique_ptr<Window> m_window;
 
         std::unique_ptr<widget::MainMenuWidget> m_mainMenuWidget;
-
-        std::unique_ptr<data::View> m_leftView;
-        std::unique_ptr<data::View> m_rightView;
+        std::unique_ptr<widget::BottomMenuWidget> m_bottomMenuWidget;
 
         //-------------------------------------------------
         // Logic

@@ -18,8 +18,29 @@
 
 #include <imgui_internal.h>
 #include <SDL_events.h>
+#include <filesystem>
 #include "BottomMenuWidget.h"
 #include "IcAssert.h"
+#include "vendor/imgui/imgui_stdlib.h"
+
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+ic::widget::BottomMenuWidget::BottomMenuWidget(data::View* t_parentLeftView, data::View* t_parentRightView)
+    : m_parentLeftView{ t_parentLeftView }
+    , m_parentRightView{ t_parentRightView }
+{
+    IC_ASSERT(m_parentLeftView, "[BottomMenuWidget::BottomMenuWidget()] Null pointer.")
+    IC_ASSERT(m_parentRightView, "[BottomMenuWidget::BottomMenuWidget()] Null pointer.")
+
+    IC_LOG_DEBUG("[BottomMenuWidget::BottomMenuWidget()] Create BottomMenuWidget.");
+}
+
+ic::widget::BottomMenuWidget::~BottomMenuWidget() noexcept
+{
+    IC_LOG_DEBUG("[BottomMenuWidget::~BottomMenuWidget()] Destruct BottomMenuWidget.");
+}
 
 //-------------------------------------------------
 // Setter
@@ -64,7 +85,7 @@ void ic::widget::BottomMenuWidget::Render()
     }
     if (ImGui::BeginPopupModal("##bottomHelpScreen", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("This is the main help screen for ic.");
+        ImGui::Text("Shift + Left mouse button to select file or directory.");
         if (ImGui::Button("OK##bottomOk", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -89,7 +110,60 @@ void ic::widget::BottomMenuWidget::Render()
 
     if (ImGui::Button("MkDir##bottomMkDir"))
     {
-        // todo
+        ImGui::OpenPopup("##bottomModalMkDir");
+    }
+    if (ImGui::BeginPopupModal("##bottomModalMkDir", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Create a new directory.");
+
+        std::string newPathStr;
+        ImGui::InputText("##bottomModalMkDirNewPath", &newPathStr);
+
+        // close
+        if (ImGui::Button("Close##bottomModalMkDirClose", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+        if(ImGui::Button("Create##bottomModalMkDirCreate"))
+        {
+            std::filesystem::path p;
+
+            /*
+            if (m_currentSide == Side::LEFT)
+            {
+                p = m_currentPathLeft / m_newPathStr;
+            }
+            else
+            {
+                p = m_currentPathRight / m_newPathStr;
+            }
+
+            if (!std::filesystem::exists(p))
+            {
+                if (std::filesystem::create_directory(p))
+                {
+                    IC_LOG_DEBUG("[BottomMenuWidget::Render()] Directory {} created successfully.", p.filename().string());
+                    m_entriesLeft = fs::read_from(m_currentPathLeft);
+                    m_entriesRight = fs::read_from(m_currentPathRight);
+                }
+                else
+                {
+                    IC_LOG_DEBUG("[BottomMenuWidget::Render()] Failed to create directory.");
+                }
+            }
+            else
+            {
+                IC_LOG_DEBUG("[BottomMenuWidget::Render()] Directory already exists.");
+            }
+            */
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SetItemDefaultFocus();
+        ImGui::EndPopup();
     }
     ImGui::SameLine();
 

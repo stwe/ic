@@ -18,14 +18,18 @@
 
 #include <imgui.h>
 #include "DebugWidget.h"
+#include "application/Application.h"
+#include "vendor/magic/magic_enum.hpp"
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-void ic::widget::DebugWidget::Render(const data::View& t_leftView, const data::View& t_rightView)
+void ic::widget::DebugWidget::Render(const application::Application* t_application)
 {
     ImGui::Begin("Debug");
+
+    // FPS
 
     const auto fps{ static_cast<double>(ImGui::GetIO().Framerate) };
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // red
@@ -34,20 +38,32 @@ void ic::widget::DebugWidget::Render(const data::View& t_leftView, const data::V
 
     ImGui::Separator();
 
+    // Current view type
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)); // blue
+    ImGui::Text("Current view type: %s", std::string(magic_enum::enum_name(application::Application::current_view_type)).c_str());
+    ImGui::PopStyleColor(1);
+
+    ImGui::Separator();
+
+    // Left selected
+
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
     ImGui::Text("Left");
     ImGui::PopStyleColor(1);
-    for (const auto& entry : t_leftView.selectedEntries)
+    for (const auto& entry : t_application->leftView->selectedEntries)
     {
         ImGui::TextUnformatted(entry.filename().string().c_str());
     }
 
     ImGui::Separator();
 
+    // Right selected
+
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // yellow
     ImGui::Text("Right");
     ImGui::PopStyleColor(1);
-    for (const auto& entry : t_rightView.selectedEntries)
+    for (const auto& entry : t_application->rightView->selectedEntries)
     {
         ImGui::TextUnformatted(entry.filename().string().c_str());
     }

@@ -27,7 +27,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-ic::widget::InfoWidget::InfoWidget(ic::data::View* t_parentView)
+ic::widget::InfoWidget::InfoWidget(data::View* t_parentView)
     : m_parentView{ t_parentView }
 {
     IC_ASSERT(m_parentView, "[InfoWidget::InfoWidget()] Null pointer.")

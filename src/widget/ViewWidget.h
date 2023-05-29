@@ -77,7 +77,7 @@ namespace ic::widget
         // Helper
         //-------------------------------------------------
 
-        static void RenderHeader();
+        void RenderHeader() const;
         void RenderFirstRow() const;
         void RenderRows() const;
 

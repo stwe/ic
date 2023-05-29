@@ -102,11 +102,21 @@ void ic::widget::ViewWidget::Render() const
 // Helper
 //-------------------------------------------------
 
-void ic::widget::ViewWidget::RenderHeader()
+void ic::widget::ViewWidget::RenderHeader() const
 {
     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
     ImGui::TableSetupColumn("Modify time", ImGuiTableColumnFlags_WidthStretch);
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (m_parentView->viewType == application::Application::current_view_type)
+    {
+        style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.7f, 0.5f, 1.0f, 1.0f); // purple
+    }
+    else
+    {
+        style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.3f, 0.4f, 0.8f, 1.0f); // blue
+    }
 
     ImGui::TableHeadersRow();
 }

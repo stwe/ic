@@ -18,6 +18,11 @@
 
 #pragma once
 
+namespace ic::data
+{
+    class View;
+}
+
 namespace ic::widget
 {
     class BottomMenuWidget
@@ -29,25 +34,27 @@ namespace ic::widget
 
         BottomMenuWidget() = delete;
 
+        explicit BottomMenuWidget(data::View* t_parentLeftView, data::View* t_parentRightView);
+
         BottomMenuWidget(const BottomMenuWidget& t_other) = delete;
         BottomMenuWidget(BottomMenuWidget&& t_other) noexcept = delete;
         BottomMenuWidget& operator=(const BottomMenuWidget& t_other) = delete;
         BottomMenuWidget& operator=(BottomMenuWidget&& t_other) noexcept = delete;
 
-        ~BottomMenuWidget() noexcept = delete;
+        ~BottomMenuWidget() noexcept;
 
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------
 
-        static void SetPosition(float t_x, float t_y);
-        static void SetSize(float t_x, float t_y);
+        void SetPosition(float t_x, float t_y);
+        void SetSize(float t_x, float t_y);
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        static void Render();
+        void Render();
 
     protected:
 
@@ -56,9 +63,12 @@ namespace ic::widget
         // Member
         //-------------------------------------------------
 
-        inline static float m_pos_x{ -1.0f };
-        inline static float m_pos_y{ -1.0f };
-        inline static float m_size_x{ -1.0f };
-        inline static float m_size_y{ -1.0f };
+        data::View* m_parentLeftView{ nullptr };
+        data::View* m_parentRightView{ nullptr };
+
+        float m_pos_x{ -1.0f };
+        float m_pos_y{ -1.0f };
+        float m_size_x{ -1.0f };
+        float m_size_y{ -1.0f };
     };
 }
