@@ -134,12 +134,19 @@ void ic::widget::ViewWidget::RenderFirstRow() const
             if (column == 0)
             {
                 ImGui::PushID(0);
-                if (ImGui::Selectable("/..", false, ImGuiSelectableFlags_AllowDoubleClick) && ImGui::IsMouseDoubleClicked(0))
+                if (ImGui::Selectable("/..", false, ImGuiSelectableFlags_AllowDoubleClick))
                 {
-                    application::Application::event_dispatcher.dispatch(
-                        event::IcEventType::UP_DIR,
-                        event::UpDirEvent(m_parentView->currentPath, m_parentView->viewType)
-                    );
+                    if (ImGui::IsMouseDoubleClicked(0))
+                    {
+                        application::Application::event_dispatcher.dispatch(
+                            event::IcEventType::UP_DIR,
+                            event::UpDirEvent(m_parentView->currentPath, m_parentView->viewType)
+                        );
+                    }
+                    else
+                    {
+                        application::Application::current_view_type = m_parentView->viewType;
+                    }
                 }
                 ImGui::PopID();
             }
